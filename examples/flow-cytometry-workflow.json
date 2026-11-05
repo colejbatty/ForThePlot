@@ -1,0 +1,360 @@
+{
+  "fortheplot": 1,
+  "title": "Immunophenotyping by flow cytometry",
+  "canvas": {
+    "width": 1373,
+    "height": 360,
+    "background": "#ffffff"
+  },
+  "font": "Arial, Helvetica, sans-serif",
+  "elements": [
+    {
+      "x": 40,
+      "y": 40,
+      "rotation": 0,
+      "opacity": 1,
+      "text": "**Immunophenotyping by flow cytometry**",
+      "fontSize": 30,
+      "color": "#1f2933",
+      "bold": false,
+      "italic": false,
+      "align": "left",
+      "w": 0,
+      "background": null,
+      "type": "text",
+      "id": "text"
+    },
+    {
+      "x": 50,
+      "y": 176.08333333333331,
+      "rotation": 0,
+      "opacity": 1,
+      "colors": {},
+      "flipX": false,
+      "flipY": false,
+      "label": {
+        "text": "Mouse",
+        "position": "bottom",
+        "fontSize": 16,
+        "color": "#1f2933",
+        "bold": false
+      },
+      "id": "mouse",
+      "icon": "mouse",
+      "w": 130,
+      "type": "icon",
+      "h": 75.83333333333334
+    },
+    {
+      "x": 256,
+      "y": 179,
+      "rotation": 0,
+      "opacity": 1,
+      "colors": {},
+      "flipX": false,
+      "flipY": false,
+      "label": {
+        "text": "Harvest spleen",
+        "position": "bottom",
+        "fontSize": 16,
+        "color": "#1f2933",
+        "bold": false
+      },
+      "id": "spleen",
+      "icon": "spleen",
+      "w": 100,
+      "type": "icon",
+      "h": 70
+    },
+    {
+      "x": 432,
+      "y": 154,
+      "rotation": 0,
+      "opacity": 1,
+      "colors": {},
+      "flipX": false,
+      "flipY": false,
+      "label": {
+        "text": "Single-cell\nsuspension",
+        "position": "bottom",
+        "fontSize": 16,
+        "color": "#1f2933",
+        "bold": false
+      },
+      "id": "tube",
+      "icon": "conical-tube",
+      "w": 40,
+      "type": "icon",
+      "h": 120
+    },
+    {
+      "x": 548,
+      "y": 174,
+      "rotation": 0,
+      "opacity": 1,
+      "colors": {
+        "primary": "#8c6bd6",
+        "secondary": "#c3b3ef"
+      },
+      "flipX": false,
+      "flipY": false,
+      "label": {
+        "text": "Stain with\nantibodies",
+        "position": "bottom",
+        "fontSize": 16,
+        "color": "#1f2933",
+        "bold": false
+      },
+      "id": "stain",
+      "icon": "antibody",
+      "w": 80,
+      "type": "icon",
+      "h": 80
+    },
+    {
+      "x": 704,
+      "y": 158.44444444444446,
+      "rotation": 0,
+      "opacity": 1,
+      "colors": {},
+      "flipX": false,
+      "flipY": false,
+      "label": {
+        "text": "Acquire",
+        "position": "bottom",
+        "fontSize": 16,
+        "color": "#1f2933",
+        "bold": false
+      },
+      "id": "facs",
+      "icon": "facs-tube",
+      "w": 40,
+      "type": "icon",
+      "h": 111.11111111111111
+    },
+    {
+      "x": 820,
+      "y": 167.33333333333334,
+      "rotation": 0,
+      "opacity": 1,
+      "colors": {},
+      "flipX": false,
+      "flipY": false,
+      "label": {
+        "text": "Flow cytometer",
+        "position": "bottom",
+        "fontSize": 16,
+        "color": "#1f2933",
+        "bold": false
+      },
+      "id": "cyto",
+      "icon": "flow-cytometer",
+      "w": 140,
+      "type": "icon",
+      "h": 93.33333333333333
+    },
+    {
+      "x": 1036,
+      "y": 159,
+      "rotation": 0,
+      "opacity": 1,
+      "colors": {},
+      "flipX": false,
+      "flipY": false,
+      "label": {
+        "text": "Gate populations",
+        "position": "bottom",
+        "fontSize": 16,
+        "color": "#1f2933",
+        "bold": false
+      },
+      "id": "plot",
+      "icon": "flow-plot",
+      "w": 110,
+      "type": "icon",
+      "h": 110
+    },
+    {
+      "x": 1222,
+      "y": 159,
+      "rotation": 0,
+      "opacity": 1,
+      "colors": {},
+      "flipX": false,
+      "flipY": false,
+      "label": {
+        "text": "Cluster (UMAP)",
+        "position": "bottom",
+        "fontSize": 16,
+        "color": "#1f2933",
+        "bold": false
+      },
+      "id": "umap",
+      "icon": "umap",
+      "w": 110,
+      "type": "icon",
+      "h": 110
+    },
+    {
+      "from": {
+        "id": "mouse",
+        "anchor": "auto"
+      },
+      "to": {
+        "id": "spleen",
+        "anchor": "auto"
+      },
+      "routing": "straight",
+      "curvature": 0.3,
+      "stroke": "#9aa5b1",
+      "width": 3,
+      "dash": "solid",
+      "head": "arrow",
+      "tail": "none",
+      "label": "",
+      "labelSize": 14,
+      "gap": 6,
+      "opacity": 1,
+      "type": "arrow",
+      "id": "arrow"
+    },
+    {
+      "from": {
+        "id": "spleen",
+        "anchor": "auto"
+      },
+      "to": {
+        "id": "tube",
+        "anchor": "auto"
+      },
+      "routing": "straight",
+      "curvature": 0.3,
+      "stroke": "#9aa5b1",
+      "width": 3,
+      "dash": "solid",
+      "head": "arrow",
+      "tail": "none",
+      "label": "",
+      "labelSize": 14,
+      "gap": 6,
+      "opacity": 1,
+      "type": "arrow",
+      "id": "arrow-2"
+    },
+    {
+      "from": {
+        "id": "tube",
+        "anchor": "auto"
+      },
+      "to": {
+        "id": "stain",
+        "anchor": "auto"
+      },
+      "routing": "straight",
+      "curvature": 0.3,
+      "stroke": "#9aa5b1",
+      "width": 3,
+      "dash": "solid",
+      "head": "arrow",
+      "tail": "none",
+      "label": "",
+      "labelSize": 14,
+      "gap": 6,
+      "opacity": 1,
+      "type": "arrow",
+      "id": "arrow-3"
+    },
+    {
+      "from": {
+        "id": "stain",
+        "anchor": "auto"
+      },
+      "to": {
+        "id": "facs",
+        "anchor": "auto"
+      },
+      "routing": "straight",
+      "curvature": 0.3,
+      "stroke": "#9aa5b1",
+      "width": 3,
+      "dash": "solid",
+      "head": "arrow",
+      "tail": "none",
+      "label": "",
+      "labelSize": 14,
+      "gap": 6,
+      "opacity": 1,
+      "type": "arrow",
+      "id": "arrow-4"
+    },
+    {
+      "from": {
+        "id": "facs",
+        "anchor": "auto"
+      },
+      "to": {
+        "id": "cyto",
+        "anchor": "auto"
+      },
+      "routing": "straight",
+      "curvature": 0.3,
+      "stroke": "#9aa5b1",
+      "width": 3,
+      "dash": "solid",
+      "head": "arrow",
+      "tail": "none",
+      "label": "",
+      "labelSize": 14,
+      "gap": 6,
+      "opacity": 1,
+      "type": "arrow",
+      "id": "arrow-5"
+    },
+    {
+      "from": {
+        "id": "cyto",
+        "anchor": "auto"
+      },
+      "to": {
+        "id": "plot",
+        "anchor": "auto"
+      },
+      "routing": "straight",
+      "curvature": 0.3,
+      "stroke": "#9aa5b1",
+      "width": 3,
+      "dash": "solid",
+      "head": "arrow",
+      "tail": "none",
+      "label": "",
+      "labelSize": 14,
+      "gap": 6,
+      "opacity": 1,
+      "type": "arrow",
+      "id": "arrow-6"
+    },
+    {
+      "from": {
+        "id": "plot",
+        "anchor": "auto"
+      },
+      "to": {
+        "id": "umap",
+        "anchor": "auto"
+      },
+      "routing": "straight",
+      "curvature": 0.3,
+      "stroke": "#9aa5b1",
+      "width": 3,
+      "dash": "solid",
+      "head": "arrow",
+      "tail": "none",
+      "label": "",
+      "labelSize": 14,
+      "gap": 6,
+      "opacity": 1,
+      "type": "arrow",
+      "id": "arrow-7"
+    }
+  ]
+}

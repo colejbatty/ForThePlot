@@ -1,0 +1,357 @@
+{
+  "fortheplot": 1,
+  "title": "Autologous CAR-T cell therapy",
+  "canvas": {
+    "width": 1500,
+    "height": 520,
+    "background": "#ffffff"
+  },
+  "font": "Arial, Helvetica, sans-serif",
+  "elements": [
+    {
+      "x": 40,
+      "y": 26,
+      "rotation": 0,
+      "opacity": 1,
+      "text": "**Autologous CAR-T cell therapy**",
+      "fontSize": 30,
+      "color": "#1f2933",
+      "bold": false,
+      "italic": false,
+      "align": "left",
+      "w": 0,
+      "background": null,
+      "type": "text",
+      "id": "text"
+    },
+    {
+      "x": 70,
+      "y": 130,
+      "rotation": 0,
+      "opacity": 1,
+      "colors": {},
+      "flipX": false,
+      "flipY": false,
+      "label": {
+        "text": "**1** Patient",
+        "position": "bottom",
+        "fontSize": 16,
+        "color": "#1f2933",
+        "bold": false
+      },
+      "id": "patient",
+      "icon": "human",
+      "w": 70,
+      "type": "icon",
+      "h": 140
+    },
+    {
+      "x": 232,
+      "y": 136.44444444444446,
+      "rotation": 0,
+      "opacity": 1,
+      "colors": {},
+      "flipX": false,
+      "flipY": false,
+      "label": {
+        "text": "**2** Leukapheresis",
+        "position": "bottom",
+        "fontSize": 16,
+        "color": "#1f2933",
+        "bold": false
+      },
+      "id": "blood",
+      "icon": "blood-tube",
+      "w": 44,
+      "type": "icon",
+      "h": 127.11111111111111
+    },
+    {
+      "x": 368,
+      "y": 145,
+      "rotation": 0,
+      "opacity": 1,
+      "colors": {},
+      "flipX": false,
+      "flipY": false,
+      "label": {
+        "text": "**3** Isolate T cells",
+        "position": "bottom",
+        "fontSize": 16,
+        "color": "#1f2933",
+        "bold": false
+      },
+      "id": "tcells",
+      "icon": "t-cell",
+      "w": 110,
+      "type": "icon",
+      "h": 110
+    },
+    {
+      "x": 570,
+      "y": 155,
+      "rotation": 0,
+      "opacity": 1,
+      "colors": {},
+      "flipX": false,
+      "flipY": false,
+      "label": {
+        "text": "**4** Lentiviral CAR\ntransduction",
+        "position": "bottom",
+        "fontSize": 16,
+        "color": "#1f2933",
+        "bold": false
+      },
+      "id": "vector",
+      "icon": "retrovirus",
+      "w": 90,
+      "type": "icon",
+      "h": 90
+    },
+    {
+      "x": 752,
+      "y": 159.27272727272728,
+      "rotation": 0,
+      "opacity": 1,
+      "colors": {},
+      "flipX": false,
+      "flipY": false,
+      "label": {
+        "text": "**5** Expand",
+        "position": "bottom",
+        "fontSize": 16,
+        "color": "#1f2933",
+        "bold": false
+      },
+      "id": "flask",
+      "icon": "culture-flask",
+      "w": 140,
+      "type": "icon",
+      "h": 81.45454545454545
+    },
+    {
+      "x": 984,
+      "y": 135,
+      "rotation": 0,
+      "opacity": 1,
+      "colors": {},
+      "flipX": false,
+      "flipY": false,
+      "label": {
+        "text": "**6** CAR-T cells",
+        "position": "bottom",
+        "fontSize": 16,
+        "color": "#1f2933",
+        "bold": false
+      },
+      "id": "cart",
+      "icon": "car-t-cell",
+      "w": 130,
+      "type": "icon",
+      "h": 130
+    },
+    {
+      "x": 1206,
+      "y": 178.68852459016392,
+      "rotation": 0,
+      "opacity": 1,
+      "colors": {},
+      "flipX": false,
+      "flipY": false,
+      "label": {
+        "text": "**7** Infuse",
+        "position": "bottom",
+        "fontSize": 16,
+        "color": "#1f2933",
+        "bold": false
+      },
+      "id": "infuse",
+      "icon": "syringe",
+      "w": 130,
+      "type": "icon",
+      "h": 42.62295081967213
+    },
+    {
+      "from": {
+        "id": "patient",
+        "anchor": "auto"
+      },
+      "to": {
+        "id": "blood",
+        "anchor": "auto"
+      },
+      "routing": "straight",
+      "curvature": 0.3,
+      "stroke": "#9aa5b1",
+      "width": 3,
+      "dash": "solid",
+      "head": "arrow",
+      "tail": "none",
+      "label": "",
+      "labelSize": 14,
+      "gap": 6,
+      "opacity": 1,
+      "type": "arrow",
+      "id": "arrow"
+    },
+    {
+      "from": {
+        "id": "blood",
+        "anchor": "auto"
+      },
+      "to": {
+        "id": "tcells",
+        "anchor": "auto"
+      },
+      "routing": "straight",
+      "curvature": 0.3,
+      "stroke": "#9aa5b1",
+      "width": 3,
+      "dash": "solid",
+      "head": "arrow",
+      "tail": "none",
+      "label": "",
+      "labelSize": 14,
+      "gap": 6,
+      "opacity": 1,
+      "type": "arrow",
+      "id": "arrow-2"
+    },
+    {
+      "from": {
+        "id": "tcells",
+        "anchor": "auto"
+      },
+      "to": {
+        "id": "vector",
+        "anchor": "auto"
+      },
+      "routing": "straight",
+      "curvature": 0.3,
+      "stroke": "#9aa5b1",
+      "width": 3,
+      "dash": "solid",
+      "head": "arrow",
+      "tail": "none",
+      "label": "",
+      "labelSize": 14,
+      "gap": 6,
+      "opacity": 1,
+      "type": "arrow",
+      "id": "arrow-3"
+    },
+    {
+      "from": {
+        "id": "vector",
+        "anchor": "auto"
+      },
+      "to": {
+        "id": "flask",
+        "anchor": "auto"
+      },
+      "routing": "straight",
+      "curvature": 0.3,
+      "stroke": "#9aa5b1",
+      "width": 3,
+      "dash": "solid",
+      "head": "arrow",
+      "tail": "none",
+      "label": "",
+      "labelSize": 14,
+      "gap": 6,
+      "opacity": 1,
+      "type": "arrow",
+      "id": "arrow-4"
+    },
+    {
+      "from": {
+        "id": "flask",
+        "anchor": "auto"
+      },
+      "to": {
+        "id": "cart",
+        "anchor": "auto"
+      },
+      "routing": "straight",
+      "curvature": 0.3,
+      "stroke": "#9aa5b1",
+      "width": 3,
+      "dash": "solid",
+      "head": "arrow",
+      "tail": "none",
+      "label": "",
+      "labelSize": 14,
+      "gap": 6,
+      "opacity": 1,
+      "type": "arrow",
+      "id": "arrow-5"
+    },
+    {
+      "from": {
+        "id": "cart",
+        "anchor": "auto"
+      },
+      "to": {
+        "id": "infuse",
+        "anchor": "auto"
+      },
+      "routing": "straight",
+      "curvature": 0.3,
+      "stroke": "#9aa5b1",
+      "width": 3,
+      "dash": "solid",
+      "head": "arrow",
+      "tail": "none",
+      "label": "",
+      "labelSize": 14,
+      "gap": 6,
+      "opacity": 1,
+      "type": "arrow",
+      "id": "arrow-6"
+    },
+    {
+      "from": {
+        "id": "infuse",
+        "anchor": "bottom"
+      },
+      "to": {
+        "id": "patient",
+        "anchor": "bottom"
+      },
+      "routing": "elbow",
+      "curvature": 0.3,
+      "stroke": "#e8724a",
+      "width": 3,
+      "dash": "dashed",
+      "head": "arrow",
+      "tail": "none",
+      "label": "Re-infusion (~2–4 weeks vein-to-vein)",
+      "labelSize": 15,
+      "gap": 6,
+      "opacity": 1,
+      "type": "arrow",
+      "id": "arrow-7"
+    },
+    {
+      "x": 65,
+      "y": 419,
+      "rotation": 0,
+      "opacity": 1,
+      "colors": {},
+      "flipX": false,
+      "flipY": false,
+      "label": {
+        "text": "CAR: scFv – hinge – TM – 4-1BB – CD3ζ",
+        "position": "right",
+        "fontSize": 15,
+        "color": "#52606d",
+        "bold": false
+      },
+      "id": "car",
+      "icon": "car",
+      "w": 30,
+      "type": "icon",
+      "h": 72
+    }
+  ]
+}

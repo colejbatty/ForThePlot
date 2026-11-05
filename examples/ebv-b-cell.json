@@ -1,0 +1,230 @@
+{
+  "fortheplot": 1,
+  "title": "EBV infection of B cells and T cell control",
+  "canvas": {
+    "width": 1270,
+    "height": 688,
+    "background": "#ffffff"
+  },
+  "font": "Arial, Helvetica, sans-serif",
+  "elements": [
+    {
+      "x": 40,
+      "y": 40,
+      "rotation": 0,
+      "opacity": 1,
+      "text": "**EBV infects B cells; CD8^+ T cells control infected cells**",
+      "fontSize": 28,
+      "color": "#1f2933",
+      "bold": false,
+      "italic": false,
+      "align": "left",
+      "w": 0,
+      "background": null,
+      "type": "text",
+      "id": "text"
+    },
+    {
+      "x": 90,
+      "y": 254,
+      "rotation": 0,
+      "opacity": 1,
+      "colors": {},
+      "flipX": false,
+      "flipY": false,
+      "label": {
+        "text": "EBV",
+        "position": "bottom",
+        "fontSize": 18,
+        "color": "#1f2933",
+        "bold": true
+      },
+      "id": "ebv",
+      "icon": "herpesvirus",
+      "w": 120,
+      "type": "icon",
+      "h": 120
+    },
+    {
+      "x": 355,
+      "y": 219,
+      "rotation": 0,
+      "opacity": 1,
+      "colors": {},
+      "flipX": false,
+      "flipY": false,
+      "label": {
+        "text": "Resting B cell",
+        "position": "bottom",
+        "fontSize": 18,
+        "color": "#1f2933",
+        "bold": false
+      },
+      "id": "bcell",
+      "icon": "b-cell",
+      "w": 190,
+      "type": "icon",
+      "h": 190
+    },
+    {
+      "x": 715,
+      "y": 209,
+      "rotation": 0,
+      "opacity": 1,
+      "colors": {
+        "primary": "#e88c3a",
+        "accent": "#c4532a"
+      },
+      "flipX": false,
+      "flipY": false,
+      "label": {
+        "text": "Latently infected,\nproliferating B cell",
+        "position": "bottom",
+        "fontSize": 18,
+        "color": "#1f2933",
+        "bold": false
+      },
+      "id": "lcl",
+      "icon": "b-cell",
+      "w": 210,
+      "type": "icon",
+      "h": 210
+    },
+    {
+      "x": 1045,
+      "y": 449,
+      "rotation": 0,
+      "opacity": 1,
+      "colors": {},
+      "flipX": false,
+      "flipY": false,
+      "label": {
+        "text": "EBV-specific CD8^+ T cell",
+        "position": "bottom",
+        "fontSize": 18,
+        "color": "#1f2933",
+        "bold": false
+      },
+      "id": "ctl",
+      "icon": "t-cell-cd8",
+      "w": 170,
+      "type": "icon",
+      "h": 170
+    },
+    {
+      "x": 772,
+      "y": 266,
+      "rotation": 0,
+      "opacity": 1,
+      "colors": {},
+      "flipX": false,
+      "flipY": false,
+      "label": null,
+      "id": "ep",
+      "icon": "herpesvirus",
+      "w": 56,
+      "type": "icon",
+      "h": 56
+    },
+    {
+      "x": 825,
+      "y": 329.4166666666667,
+      "rotation": 0,
+      "opacity": 1,
+      "colors": {},
+      "flipX": false,
+      "flipY": false,
+      "label": null,
+      "id": "ep2",
+      "icon": "dna",
+      "w": 70,
+      "type": "icon",
+      "h": 29.166666666666668
+    },
+    {
+      "from": {
+        "id": "ebv",
+        "anchor": "auto"
+      },
+      "to": {
+        "id": "bcell",
+        "anchor": "auto"
+      },
+      "routing": "straight",
+      "curvature": 0.3,
+      "stroke": "#3f63b5",
+      "width": 3,
+      "dash": "solid",
+      "head": "arrow",
+      "tail": "none",
+      "label": "gp350 : CD21",
+      "labelSize": 15,
+      "gap": 6,
+      "opacity": 1,
+      "type": "arrow",
+      "id": "arrow"
+    },
+    {
+      "from": {
+        "id": "bcell",
+        "anchor": "auto"
+      },
+      "to": {
+        "id": "lcl",
+        "anchor": "auto"
+      },
+      "routing": "straight",
+      "curvature": 0.3,
+      "stroke": "#52606d",
+      "width": 3,
+      "dash": "solid",
+      "head": "arrow",
+      "tail": "none",
+      "label": "latency III\n(EBNAs, LMP1/2)",
+      "labelSize": 15,
+      "gap": 6,
+      "opacity": 1,
+      "type": "arrow",
+      "id": "arrow-2"
+    },
+    {
+      "from": {
+        "id": "ctl",
+        "anchor": "auto"
+      },
+      "to": {
+        "id": "lcl",
+        "anchor": "auto"
+      },
+      "routing": "curved",
+      "curvature": 0.3,
+      "stroke": "#d64545",
+      "width": 4,
+      "dash": "solid",
+      "head": "inhibit",
+      "tail": "none",
+      "label": "killing",
+      "labelSize": 15,
+      "gap": 6,
+      "opacity": 1,
+      "type": "arrow",
+      "id": "arrow-3"
+    },
+    {
+      "x": 360,
+      "y": 614,
+      "rotation": 0,
+      "opacity": 1,
+      "text": "Loss of T cell control → lymphoproliferation (e.g. PTLD)",
+      "fontSize": 17,
+      "color": "#7b8794",
+      "bold": false,
+      "italic": true,
+      "align": "left",
+      "w": 0,
+      "background": null,
+      "type": "text",
+      "id": "text-2"
+    }
+  ]
+}

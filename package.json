@@ -1,0 +1,74 @@
+{
+  "name": "fortheplot",
+  "version": "0.9.0",
+  "description": "Open-source scientific illustration (BioRender-style) that both people and AI agents can drive: web editor, JSON figure format, CLI, and MCP server.",
+  "type": "module",
+  "license": "MIT",
+  "homepage": "https://github.com/colejbatty/fortheplot#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/colejbatty/fortheplot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/colejbatty/fortheplot/issues"
+  },
+  "bin": {
+    "fortheplot": "src/cli/fortheplot.js",
+    "4tp": "src/cli/fortheplot.js"
+  },
+  "main": "src/core/index.js",
+  "exports": {
+    ".": "./src/core/index.js",
+    "./icons": "./src/icons/index.js",
+    "./render": "./src/core/render.js"
+  },
+  "files": [
+    "src",
+    "assets",
+    "dist",
+    "schema",
+    "examples",
+    "docs",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "node scripts/build-standalone.js",
+    "test": "node --test",
+    "serve": "node src/cli/fortheplot.js serve",
+    "mcp": "node src/cli/fortheplot.js mcp",
+    "icons:sheet": "node scripts/icon-sheet.js",
+    "build:offline": "node scripts/build-offline.js",
+    "build:mcpb": "node scripts/build-mcpb.js",
+    "build:all": "node scripts/build-standalone.js && node scripts/build-offline.js && node scripts/build-mcpb.js",
+    "build:exe": "node scripts/build-exe.js win-x64"
+  },
+  "keywords": [
+    "biology",
+    "illustration",
+    "scientific-figures",
+    "immunology",
+    "svg",
+    "mcp",
+    "agents",
+    "biorender-alternative"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "@resvg/resvg-js": "^2.6.2",
+    "pdfkit": "^0.17.2",
+    "pptxgenjs": "^4.0.1",
+    "svg-to-pdfkit": "^0.1.8",
+    "utif": "^3.1.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@anthropic-ai/mcpb": "^2.1.2",
+    "esbuild": "^0.28.2",
+    "postject": "^1.0.0-alpha.6",
+    "svgo": "^4.1.0"
+  }
+}

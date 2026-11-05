@@ -1,0 +1,12 @@
+node_modules/
+*.tmp
+.DS_Store
+Thumbs.db
+/figures/
+build/
+# large release files (attach to GitHub Releases instead of committing)
+dist/ForThePlot.mcpb
+dist/fortheplot-offline.html
+dist/fortheplot-server-*/
+dist/ForThePlot-server-*.zip
+dist/ForThePlot-server-*.tar.gz

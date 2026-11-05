@@ -1,0 +1,1050 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "figure.schema.json",
+  "title": "ForThePlot figure",
+  "type": "object",
+  "required": [
+    "canvas",
+    "elements"
+  ],
+  "properties": {
+    "fortheplot": {
+      "const": 1
+    },
+    "title": {
+      "type": "string"
+    },
+    "canvas": {
+      "type": "object",
+      "required": [
+        "width",
+        "height"
+      ],
+      "properties": {
+        "width": {
+          "type": "number",
+          "minimum": 50
+        },
+        "height": {
+          "type": "number",
+          "minimum": 50
+        },
+        "background": {
+          "type": "string",
+          "description": "Hex color or \"none\""
+        },
+        "printWidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Printed width in mm; text sizes can then be given in points and exports default to this size"
+        }
+      }
+    },
+    "font": {
+      "type": "string"
+    },
+    "elements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/element"
+      }
+    },
+    "iconDefs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "svg",
+          "w",
+          "h"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "svg": {
+            "type": "string"
+          },
+          "w": {
+            "type": "number"
+          },
+          "h": {
+            "type": "number"
+          },
+          "license": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "own": {
+            "type": "boolean",
+            "description": "An icon the person saved from their own figures"
+          },
+          "credits": {
+            "type": "array",
+            "description": "Third-party icons an own icon was made from",
+            "items": {
+              "type": "object",
+              "properties": {
+                "author": {
+                  "type": "string"
+                },
+                "license": {
+                  "type": "string"
+                },
+                "source": {
+                  "type": "string"
+                },
+                "icons": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "images": {
+      "type": "object",
+      "description": "Pictures used by image elements, keyed by id",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "src"
+        ],
+        "properties": {
+          "src": {
+            "type": "string",
+            "pattern": "^data:image/"
+          },
+          "w": {
+            "type": "number"
+          },
+          "h": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "panelLabels": {
+      "type": "object",
+      "description": "Style of the automatic panel letters and the panel titles",
+      "properties": {
+        "style": {
+          "enum": [
+            "A",
+            "a",
+            "(A)",
+            "(a)",
+            "A.",
+            "none"
+          ]
+        },
+        "size": {
+          "type": "number",
+          "description": "Letter size (px)"
+        },
+        "position": {
+          "enum": [
+            "inside",
+            "outside"
+          ]
+        },
+        "color": {
+          "$ref": "#/$defs/color"
+        },
+        "titleSize": {
+          "type": "number",
+          "description": "Title size (px); default two thirds of the letter size"
+        },
+        "letterBold": {
+          "type": "boolean"
+        },
+        "titleBold": {
+          "type": "boolean"
+        },
+        "titleColor": {
+          "$ref": "#/$defs/color"
+        }
+      }
+    },
+    "epitope": {
+      "const": 1,
+      "description": "Format version under the project's earlier name (Epitope); still read"
+    }
+  },
+  "$defs": {
+    "color": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Hex color, CSS color name, or \"none\""
+    },
+    "label": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "position": {
+              "enum": [
+                "bottom",
+                "top",
+                "left",
+                "right",
+                "center",
+                "none"
+              ]
+            },
+            "fontSize": {
+              "type": "number"
+            },
+            "color": {
+              "$ref": "#/$defs/color"
+            },
+            "bold": {
+              "type": "boolean"
+            },
+            "maxWidth": {
+              "type": "number"
+            }
+          }
+        }
+      ]
+    },
+    "endpoint": {
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "Element id"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        {
+          "type": "object",
+          "required": [
+            "id"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "anchor": {
+              "enum": [
+                "auto",
+                "center",
+                "top",
+                "bottom",
+                "left",
+                "right",
+                "top-left",
+                "top-right",
+                "bottom-left",
+                "bottom-right"
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "x",
+            "y"
+          ],
+          "properties": {
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            }
+          }
+        }
+      ]
+    },
+    "base": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "w": {
+          "type": "number"
+        },
+        "h": {
+          "type": "number"
+        },
+        "rotation": {
+          "type": "number"
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "group": {
+          "type": "string"
+        },
+        "attachedTo": {
+          "type": "string"
+        },
+        "locked": {
+          "type": "boolean"
+        },
+        "hidden": {
+          "type": "boolean"
+        }
+      }
+    },
+    "element": {
+      "oneOf": [
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/base"
+            },
+            {
+              "type": "object",
+              "required": [
+                "icon"
+              ],
+              "properties": {
+                "type": {
+                  "const": "icon"
+                },
+                "icon": {
+                  "type": "string"
+                },
+                "flipX": {
+                  "type": "boolean"
+                },
+                "flipY": {
+                  "type": "boolean"
+                },
+                "colors": {
+                  "type": "object",
+                  "properties": {
+                    "primary": {
+                      "$ref": "#/$defs/color"
+                    },
+                    "secondary": {
+                      "$ref": "#/$defs/color"
+                    },
+                    "accent": {
+                      "$ref": "#/$defs/color"
+                    }
+                  }
+                },
+                "label": {
+                  "$ref": "#/$defs/label"
+                },
+                "tint": {
+                  "$ref": "#/$defs/color",
+                  "description": "Imported icons: shift every color to this hue"
+                },
+                "colorMap": {
+                  "type": "object",
+                  "description": "Imported icons: {\"#old\": \"#new\"} color replacements",
+                  "additionalProperties": {
+                    "$ref": "#/$defs/color"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/base"
+            },
+            {
+              "type": "object",
+              "required": [
+                "type",
+                "shape"
+              ],
+              "properties": {
+                "type": {
+                  "const": "shape"
+                },
+                "shape": {
+                  "enum": [
+                    "rect",
+                    "ellipse",
+                    "triangle",
+                    "diamond",
+                    "hexagon",
+                    "brace",
+                    "membrane",
+                    "membrane-ellipse",
+                    "plot"
+                  ]
+                },
+                "fill": {
+                  "$ref": "#/$defs/paint"
+                },
+                "stroke": {
+                  "$ref": "#/$defs/color"
+                },
+                "strokeWidth": {
+                  "type": "number"
+                },
+                "dash": {
+                  "enum": [
+                    "solid",
+                    "dashed",
+                    "dotted"
+                  ]
+                },
+                "radius": {
+                  "type": "number"
+                },
+                "text": {
+                  "type": "string"
+                },
+                "fontSize": {
+                  "type": "number"
+                },
+                "textColor": {
+                  "$ref": "#/$defs/color"
+                },
+                "bold": {
+                  "type": "boolean"
+                },
+                "inner": {
+                  "$ref": "#/$defs/paint"
+                },
+                "thickness": {
+                  "type": "number"
+                },
+                "label": {
+                  "$ref": "#/$defs/label"
+                },
+                "plot": {
+                  "type": "object",
+                  "description": "Flow cytometry plot (shape \"plot\")",
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "dot",
+                        "histogram"
+                      ]
+                    },
+                    "xLabel": {
+                      "type": "string"
+                    },
+                    "yLabel": {
+                      "type": "string"
+                    },
+                    "gate": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "enum": [
+                            "rect",
+                            "ellipse",
+                            "polygon",
+                            "quad"
+                          ]
+                        },
+                        "x": {
+                          "type": "number"
+                        },
+                        "y": {
+                          "type": "number"
+                        },
+                        "w": {
+                          "type": "number"
+                        },
+                        "h": {
+                          "type": "number"
+                        },
+                        "points": {
+                          "type": "array",
+                          "items": {
+                            "type": "array",
+                            "items": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "gateLabel": {
+                      "type": "string"
+                    },
+                    "pct": {
+                      "type": [
+                        "string",
+                        "number"
+                      ]
+                    },
+                    "populations": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "seed": {
+                      "type": "number"
+                    },
+                    "fontSize": {
+                      "type": "number"
+                    },
+                    "color": {
+                      "$ref": "#/$defs/color"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/base"
+            },
+            {
+              "type": "object",
+              "required": [
+                "type",
+                "text"
+              ],
+              "properties": {
+                "type": {
+                  "const": "text"
+                },
+                "text": {
+                  "type": "string"
+                },
+                "fontSize": {
+                  "type": "number"
+                },
+                "color": {
+                  "$ref": "#/$defs/color"
+                },
+                "bold": {
+                  "type": "boolean"
+                },
+                "italic": {
+                  "type": "boolean"
+                },
+                "align": {
+                  "enum": [
+                    "left",
+                    "center",
+                    "right"
+                  ]
+                },
+                "background": {
+                  "$ref": "#/$defs/color"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "from",
+            "to"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "type": {
+              "const": "arrow"
+            },
+            "from": {
+              "$ref": "#/$defs/endpoint"
+            },
+            "to": {
+              "$ref": "#/$defs/endpoint"
+            },
+            "head": {
+              "enum": [
+                "arrow",
+                "open",
+                "inhibit",
+                "circle",
+                "diamond",
+                "none"
+              ]
+            },
+            "tail": {
+              "enum": [
+                "arrow",
+                "open",
+                "inhibit",
+                "circle",
+                "diamond",
+                "none"
+              ]
+            },
+            "routing": {
+              "enum": [
+                "straight",
+                "curved",
+                "elbow"
+              ]
+            },
+            "curvature": {
+              "type": "number"
+            },
+            "stroke": {
+              "$ref": "#/$defs/color"
+            },
+            "width": {
+              "type": "number"
+            },
+            "dash": {
+              "enum": [
+                "solid",
+                "dashed",
+                "dotted"
+              ]
+            },
+            "label": {
+              "type": "string"
+            },
+            "labelSize": {
+              "type": "number"
+            },
+            "gap": {
+              "type": "number"
+            },
+            "opacity": {
+              "type": "number"
+            },
+            "group": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/base"
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "const": "note"
+                },
+                "text": {
+                  "type": "string"
+                },
+                "target": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "id of the element the note is about"
+                },
+                "author": {
+                  "enum": [
+                    "you",
+                    "claude"
+                  ]
+                },
+                "color": {
+                  "$ref": "#/$defs/color"
+                },
+                "resolved": {
+                  "type": "boolean"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/base"
+            },
+            {
+              "type": "object",
+              "required": [
+                "type",
+                "points"
+              ],
+              "properties": {
+                "type": {
+                  "const": "path"
+                },
+                "points": {
+                  "type": "array",
+                  "minItems": 2,
+                  "items": {
+                    "oneOf": [
+                      {
+                        "type": "array",
+                        "minItems": 2,
+                        "maxItems": 6,
+                        "items": {
+                          "type": "number"
+                        }
+                      },
+                      {
+                        "type": "object",
+                        "required": [
+                          "x",
+                          "y"
+                        ],
+                        "properties": {
+                          "x": {
+                            "type": "number"
+                          },
+                          "y": {
+                            "type": "number"
+                          },
+                          "in": {
+                            "type": "array",
+                            "minItems": 2,
+                            "maxItems": 2,
+                            "items": {
+                              "type": "number"
+                            }
+                          },
+                          "out": {
+                            "type": "array",
+                            "minItems": 2,
+                            "maxItems": 2,
+                            "items": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "vw": {
+                  "type": "number"
+                },
+                "vh": {
+                  "type": "number"
+                },
+                "closed": {
+                  "type": "boolean"
+                },
+                "smooth": {
+                  "type": "boolean"
+                },
+                "fill": {
+                  "$ref": "#/$defs/paint"
+                },
+                "stroke": {
+                  "$ref": "#/$defs/color"
+                },
+                "strokeWidth": {
+                  "type": "number"
+                },
+                "dash": {
+                  "enum": [
+                    "solid",
+                    "dashed",
+                    "dotted"
+                  ]
+                },
+                "head": {
+                  "enum": [
+                    "arrow",
+                    "open",
+                    "inhibit",
+                    "circle",
+                    "diamond",
+                    "none"
+                  ]
+                },
+                "tail": {
+                  "enum": [
+                    "arrow",
+                    "open",
+                    "inhibit",
+                    "circle",
+                    "diamond",
+                    "none"
+                  ]
+                },
+                "membrane": {
+                  "type": "boolean"
+                },
+                "thickness": {
+                  "type": "number"
+                },
+                "inner": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/paint"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Interior of a closed membrane path (color or gradient)"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/base"
+            },
+            {
+              "type": "object",
+              "required": [
+                "type",
+                "image"
+              ],
+              "properties": {
+                "type": {
+                  "const": "image"
+                },
+                "image": {
+                  "type": "string",
+                  "description": "id in the figure's images map"
+                },
+                "crop": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "x": {
+                      "type": "number"
+                    },
+                    "y": {
+                      "type": "number"
+                    },
+                    "w": {
+                      "type": "number"
+                    },
+                    "h": {
+                      "type": "number"
+                    }
+                  }
+                },
+                "radius": {
+                  "type": "number"
+                },
+                "stroke": {
+                  "$ref": "#/$defs/color"
+                },
+                "strokeWidth": {
+                  "type": "number"
+                },
+                "label": {
+                  "$ref": "#/$defs/label"
+                },
+                "scaleBar": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "length": {
+                      "type": "number"
+                    },
+                    "unit": {
+                      "type": "string"
+                    },
+                    "perPx": {
+                      "type": "number"
+                    },
+                    "position": {
+                      "enum": [
+                        "bottom-right",
+                        "bottom-left",
+                        "top-right",
+                        "top-left"
+                      ]
+                    },
+                    "color": {
+                      "$ref": "#/$defs/color"
+                    },
+                    "label": {
+                      "type": "boolean"
+                    },
+                    "thickness": {
+                      "type": "number"
+                    },
+                    "fontSize": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/base"
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "const": "panel"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "fill": {
+                  "$ref": "#/$defs/paint"
+                },
+                "stroke": {
+                  "$ref": "#/$defs/color"
+                },
+                "strokeWidth": {
+                  "type": "number"
+                },
+                "radius": {
+                  "type": "number"
+                },
+                "dash": {
+                  "enum": [
+                    "solid",
+                    "dashed",
+                    "dotted"
+                  ]
+                },
+                "letter": {
+                  "type": [
+                    "string",
+                    "null",
+                    "boolean"
+                  ]
+                },
+                "letterSize": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "This panel's letter size (px); overrides panelLabels.size"
+                },
+                "titleSize": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "This panel's title size (px); overrides panelLabels.titleSize"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "gradient": {
+      "type": "object",
+      "required": [
+        "type",
+        "stops"
+      ],
+      "description": "Linear or radial gradient fill. angle follows CSS (0 up, 90 left to right, 180 top to bottom); radial cx, cy, r are fractions of the object's box",
+      "properties": {
+        "type": {
+          "enum": [
+            "linear",
+            "radial"
+          ]
+        },
+        "angle": {
+          "type": "number"
+        },
+        "cx": {
+          "type": "number"
+        },
+        "cy": {
+          "type": "number"
+        },
+        "r": {
+          "type": "number"
+        },
+        "stops": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "required": [
+              "color"
+            ],
+            "properties": {
+              "offset": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "color": {
+                "$ref": "#/$defs/color"
+              },
+              "opacity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "paint": {
+      "description": "A color, or a gradient (CSS gradient strings are accepted when writing)",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/color"
+        },
+        {
+          "$ref": "#/$defs/gradient"
+        }
+      ]
+    }
+  }
+}
