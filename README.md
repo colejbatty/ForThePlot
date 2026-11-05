@@ -176,7 +176,7 @@ Text supports `**bold**`, `*italic*`, superscripts (`CD8^+`, `Ca^{2+}`) and subs
 
 ## Icons and licensing
 
-- **Built-in icons** (`src/icons/library/`) are original drawings, MIT-licensed, and recolorable by role.
+- **Built-in icons** (`src/icons/library/`) are original drawings, MIT-licensed, and recolorable by role. The code is MIT-licensed too ([LICENSE](LICENSE)); third-party icons and fonts keep their own licenses ([NOTICE.md](NOTICE.md)).
 - **Bioicons** (`packs/bioicons/`): 2,256 icons from [bioicons.com](https://bioicons.com) under CC0, CC-BY 3.0/4.0, CC-BY-SA, MIT and BSD. Their authors and licenses are recorded per icon, shown in the editor, embedded in exported SVGs (`<desc>`), and turned into a ready-to-paste credit line (export dialog, `fortheplot credits`). CC-BY icons need attribution in your figure legend or acknowledgements. See [packs/bioicons/NOTICE.md](packs/bioicons/NOTICE.md).
 - **Fonts.** Vector PDFs embed Liberation Sans (`assets/fonts/`, SIL Open Font License), metrically compatible with Arial.
 - **Your own icons.** Drop an `.svg` onto the canvas, or turn a folder into a pack with `fortheplot import-icons ./my-svgs --out packs/mine.json --license CC-BY-4.0 --author "Me"`. Imported SVGs are sanitized (no scripts, event handlers or external links).

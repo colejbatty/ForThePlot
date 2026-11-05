@@ -4,7 +4,7 @@
 //   node scripts/build-mcpb.js
 //
 // Layout inside the bundle:
-//   manifest.json, icon.png, package.json, LICENSE
+//   manifest.json, icon.png, package.json, LICENSE, NOTICE.md
 //   server/fortheplot.mjs          the CLI + MCP server, bundled with its dependencies
 //   node_modules/@resvg/...     PNG renderer + native binaries for Windows, macOS, Linux
 //   server/data/               pdfkit font metrics
@@ -50,6 +50,7 @@ copy('dist/fortheplot.html');
 copy('assets/fonts');                              // Liberation Sans for vector PDF (SIL OFL)
 copy('node_modules/pdfkit/js/data', 'server/data'); // pdfkit's standard font metrics, read from __dirname/data
 copy('LICENSE');
+copy('NOTICE.md');
 fs.mkdirSync(path.join(out, 'examples'));
 for (const f of fs.readdirSync(path.join(root, 'examples')).filter((x) => x.endsWith('.json'))) copy(`examples/${f}`);
 fs.writeFileSync(path.join(out, 'package.json'), JSON.stringify({ name: 'fortheplot', version: pkg.version, type: 'module', private: true, license: 'MIT' }, null, 2));

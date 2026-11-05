@@ -19,10 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-The built-in icon library (src/icons/library) is original work released under
-this license. Third-party icon packs in packs/ (e.g. Bioicons) are NOT covered
-by this license; each icon keeps its own license. See packs/bioicons/NOTICE.md.
-
-The Liberation Sans fonts in assets/fonts/ (embedded in exported PDFs) are
-licensed under the SIL Open Font License 1.1; see assets/fonts/OFL.txt.
