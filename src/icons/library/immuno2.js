@@ -18,7 +18,8 @@ function lollipops(count, colors, r = 38, len = 9) {
   return ring(50, 50, r - 1, r - 1, count, 0.3).map((p, i) => {
     const c = colors[i % colors.length];
     const x2 = 50 + Math.cos(p.a) * (r + len), y2 = 50 + Math.sin(p.a) * (r + len);
-    return line(p.x, p.y, x2, y2, dark(c, 0.2), 2.2) + circle(x2, y2, 3.4, c, dark(c, 0.35), 0.9);
+    return line(p.x, p.y, x2, y2, dark(c, 0.42), 2.6) + line(p.x, p.y, x2, y2, shade(c, 0.1), 1.3)
+      + circle(x2, y2, 3.4, dark(c, 0.14), dark(c, 0.44), 0.8) + circle(x2 - 0.5, y2 - 0.6, 2.4, shade(c, 0.12)) + circle(x2 - 1.1, y2 - 1.3, 0.95, '#ffffff', 'none', 0, ' opacity="0.7"');
   }).join('');
 }
 
@@ -246,7 +247,7 @@ export const innateIcons = [
         const a = (-150 + i * 24) * Math.PI / 180;
         const x = 50 + Math.cos(a) * 40, y = 62 + Math.sin(a) * 46;
         const d = `M50 64 Q${n(50 + Math.cos(a) * 18)} ${n(62 + Math.sin(a) * 18 + 6)} ${n(x)} ${n(y)}`;
-        s += `<path d="${d}" fill="none" stroke="${dark(c.primary, 0.4)}" stroke-width="4.2"/><path d="${d}" fill="none" stroke="${c.secondary}" stroke-width="2.2" stroke-dasharray="2 1.6"/>`;
+        s += `<path d="${d}" fill="none" stroke="${dark(c.primary, 0.44)}" stroke-width="4" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${shade(c.secondary, -0.08)}" stroke-width="2.5"/><path d="${d}" fill="none" stroke="${light(c.secondary, 0.5)}" stroke-width="0.9" stroke-dasharray="2.2 1.5" opacity="0.9"/>`;
         // globular head: three subdomains
         s += circle(x, y, 9, g.url, dark(c.primary, 0.42), 1.6);
         s += `<path d="M${n(x)} ${n(y)} L${n(x)} ${n(y - 8.5)} M${n(x)} ${n(y)} L${n(x - 7.4)} ${n(y + 4.3)} M${n(x)} ${n(y)} L${n(x + 7.4)} ${n(y + 4.3)}" stroke="${dark(c.primary, 0.3)}" stroke-width="1" opacity="0.6"/>`;

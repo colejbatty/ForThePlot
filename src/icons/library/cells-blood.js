@@ -1,22 +1,14 @@
 // Blood, immune and stem cell types (additions to the original immune set).
 
 import { sphere, defs, path, circle, ellipse, gloss, dark, light, shade, n, rng, miniY, vesicle, smooth, blob, linear } from './kit.js';
-import { lymphocyte } from './cells.js';
+import { lymphocyte, rbcDisc } from './cells.js';
 import { cellCat, makeCell, round, star, outline, spindle, stellate, pack, knobs, arcBand, donut, lipid, rer, golgi, bean } from './cellkit.js';
 
 const imm = cellCat('Immune cells', { body: 0.8 });
 const bl = cellCat('Blood & stem cells', { body: 0.8 });
 
 /** Biconcave red cell seen at an angle (shared by the erythrocyte variants). */
-function disc(c, u, { cx = 50, cy = 35, rx = 46, ry = 29 } = {}) {
-  const g = sphere(u, 'b', c.primary, { cx: 38, cy: 26, hi: 0.4, lo: -0.2 });
-  const dimple = `${u}-d`;
-  const dd = `<linearGradient id="${dimple}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${dark(c.secondary, 0.25)}"/><stop offset="0.55" stop-color="${c.secondary}"/><stop offset="1" stop-color="${light(c.primary, 0.3)}"/></linearGradient>`;
-  return defs(g, dd) + ellipse(cx, cy, rx, ry, g.url, dark(c.primary, 0.4), 2)
-    + ellipse(cx, cy - 2, rx * 0.63, ry * 0.55, `url(#${dimple})`, 'none', 0, ' opacity="0.9"')
-    + `<path d="M${cx - rx * 0.58} ${cy - 2} Q${cx} ${cy + ry * 0.6} ${cx + rx * 0.58} ${cy - 2}" fill="none" stroke="${light(c.primary, 0.45)}" stroke-width="2.4" opacity="0.6" stroke-linecap="round"/>`
-    + `<path d="M${cx - rx * 0.78} ${cy - ry * 0.38} Q${cx - rx * 0.04} ${cy - ry * 1.2} ${cx + rx * 0.78} ${cy - ry * 0.45}" fill="none" stroke="#fff" stroke-width="3" opacity="0.38" stroke-linecap="round"/>`;
-}
+const disc = (c, u, o) => rbcDisc(c, u, o);
 
 const progenitor = (seed, nucleus = [51, 52, 25, 24]) => (c, u) => {
   const r = 34;

@@ -2,7 +2,7 @@
 
 ## Built-in library
 
-562 original icons in `src/icons/library/`, MIT-licensed, in eight groups (Cells; Proteins & molecules; Microbes; Genetics; Cell biology; Anatomy & organisms; Lab; Charts & symbols) and 34 categories. They share one drawing kit (`kit.js`, plus `cellkit.js` for cells) so they look like a set: lit-sphere shading with a rim of reflected light, inner edge shadows, bilayer-style membrane outlines, soft highlights, and detail where it helps the biology read (chromatin and nucleoli, mitochondria and vesicles, Ig-domain folds, helical transmembrane segments, glass, liquid and metal on lab ware). Everything is plain SVG gradients and clip paths, so icons stay sharp in PDF and recolor by role.
+562 original icons in `src/icons/library/`, MIT-licensed, in eight groups (Cells; Proteins & molecules; Microbes; Genetics; Cell biology; Anatomy & organisms; Lab; Charts & symbols) and 34 categories. They share one drawing kit (`kit.js`, plus `cellkit.js` for cells) so they look like a set: lit-sphere shading whose lit side drifts warm and whose shadows drift cool, inner edge shadows with a thin band of light just inside the membrane, bilayer-style membrane outlines, soft highlights, and detail where it helps the biology read (chromatin clumped along the nuclear envelope and nucleoli, mitochondria and vesicles, glossy Ig-domain beads joined by chain ribbons and disulfides, helical transmembrane segments, glass, liquid and metal on lab ware). Everything is plain SVG gradients and clip paths, so icons stay sharp in PDF and recolor by role.
 
 
 | file | contents |
@@ -39,7 +39,7 @@ Each icon is a small function that returns SVG for a set of colors, so users can
 }
 ```
 
-Helpers in `kit.js` (`sphere` gradients, organic `blob`s, `speckle` granules, `domain` Ig beads, `membraneStrip`, `nucleusDetail`) keep the style consistent. For a new cell type, `makeCell()` in `cellkit.js` takes an outline, nuclei and organelle counts and does the shading, placement and outline for you; `stellate()` adds branched processes. Groups for the library panel live in `groups.js`. Gradient ids must use the `uid` prefix so copies of an icon don't clash.
+Helpers in `kit.js` (`sphere` gradients, `tone` for warm/cool shading, organic `blob`s, `villous` and `lobed` outlines for ruffled lymphocytes, pseudopods and dendrites, `speckle` granules, `domain` Ig beads, `membraneStrip`, `nucleusDetail`) keep the style consistent; `ribbon` and `disulfide` in `molecules.js` draw protein chains and the bonds between them. For a new cell type, `makeCell()` in `cellkit.js` takes an outline, nuclei and organelle counts and does the shading, placement and outline for you; `stellate()` adds branched processes. Groups for the library panel live in `groups.js`. Gradient ids must use the `uid` prefix so copies of an icon don't clash.
 
 **Adding an icon:** add it to the right file, then run `npm run icons:sheet` and check `docs/icon-sheet.png`. Include tags people would actually search for (gene names, CD numbers, common abbreviations).
 

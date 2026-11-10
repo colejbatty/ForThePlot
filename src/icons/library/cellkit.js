@@ -273,7 +273,7 @@ export function branches(x, y, ang, len, w, { depth = 2, seed = 1, spread = 34, 
 export function processes(list, c, { sw = 2, fill = null, hi = true } = {}) {
   const outl = list.flatMap((b) => b.outlines), sp = list.flatMap((b) => b.spines);
   const f = fill || shade(c, -0.05);
-  return `<g fill="none" stroke="${shade(c, -0.42)}" stroke-width="${sw * 2}" stroke-linejoin="round">${outl.map((d) => `<path d="${d}"/>`).join('')}</g>`
+  return `<g fill="none" stroke="${shade(c, -0.44)}" stroke-width="${n(sw * 1.7)}" stroke-linejoin="round">${outl.map((d) => `<path d="${d}"/>`).join('')}</g>`
     + `<g fill="${f}">${outl.map((d) => `<path d="${d}"/>`).join('')}</g>`
     + (hi ? `<g fill="none" stroke="${shade(c, 0.32)}" stroke-width="0.9" stroke-linecap="round" opacity="0.55">${sp.map((p) => `<path d="${smoothOpen(p.slice(0, -1))}"/>`).join('')}</g>` : '');
 }
@@ -341,7 +341,7 @@ export function makeCell(c, u, o) {
     s += `<g fill="${gc}" stroke="${shade(gc, -0.38)}" stroke-width="${n((gr.r || 2) * 0.22)}">${body}</g><g fill="#fff" opacity="0.5">${hi}</g>`;
   }
   s += run(o.mid);
-  s += rim(u, 'br', sh.d, col, { op: o.rimOp ?? 0.28, from: o.rimFrom ?? 0.66 });
+  s += rim(u, 'br', sh.d, col, { op: o.rimOp ?? 0.28, from: o.rimFrom ?? 0.66, ...(o.membrane === false ? { glow: 0 } : {}) });
   if (o.membrane !== false) s += membrane(sh.d, col, o.sw || 2.1);
   nuc.forEach((e, i) => {
     const ncol = e.color || c.secondary;

@@ -1,7 +1,7 @@
 // Channels and transporters, more receptors, antibody formats and signaling proteins.
 
 import { sphere, defs, path, circle, ellipse, rect, line, gloss, dark, light, shade, n, blob, ring, domain, helix, membraneStrip, linear, speckle } from './kit.js';
-import { igg, g, tm, stalked } from './molecules.js';
+import { igg, g, tm, stalked, ribbon, disulfide } from './molecules.js';
 
 const R3 = { primary: 'Main', secondary: 'Secondary', accent: 'Accent' };
 const AB = { primary: 'Heavy chain', secondary: 'Light chain', accent: 'Variable / payload' };
@@ -113,7 +113,7 @@ export const receptors2 = [
       return s + glob(u, 'rbd', 18, 10, 8, 6, c.accent, 9);
     }, { anchor: [30, 72], roles: { primary: 'Protomer 1', secondary: 'Protomer 2', accent: 'Spike RBD' } }),
   rc('nkg2d', 'NKG2D', ['nkg2d', 'klrk1', 'activating receptor', 'nk cell receptor', 'mica', 'micb', 'ulbp', 'dap10'], { primary: '#e85d75', secondary: '#f5a3b3', accent: '#f2c94c' },
-    (c) => stalked(20, 10, [[8, 8]], c.primary, { stalk: 26, tmY: 60 }) + stalked(40, 10, [[8, 8]], c.secondary, { stalk: 26, tmY: 60 }) + line(21, 34, 39, 34, '#52606d', 1.4)
+    (c) => stalked(20, 10, [[8, 8]], c.primary, { stalk: 26, tmY: 60 }) + stalked(40, 10, [[8, 8]], c.secondary, { stalk: 26, tmY: 60 }) + disulfide(21.4, 34, 38.6)
       + line(30, 76, 30, 92, dark(c.accent, 0.3), 3) + domain(30, 94, 6, 4, c.accent), { anchor: [30, 68] }),
   rc('kir', 'Killer Ig-like receptor (KIR)', ['kir', 'killer immunoglobulin-like receptor', 'nk cell', 'inhibitory receptor', 'hla class i', 'itim'], { primary: '#c2405a', secondary: '#f2a0b0', accent: '#5b6bd6' },
     (c) => stalked(30, 8, [[10, 11], [10, 11, shade(c.primary, 0.15)]], c.primary, { stalk: 16, tmY: 62 }) + rect(27, 88, 6, 6, 2, c.accent, dark(c.accent, 0.4), 0.8), { anchor: [30, 70] }),
@@ -128,6 +128,7 @@ export const receptors2 = [
     (c, u) => {
       let s = '';
       [[16, c.primary], [30, c.secondary], [44, c.primary]].forEach(([x, col]) => {
+        s += ribbon(`M${x} 32 V69`, col, 1.5);
         for (let i = 0; i < 4; i++) s += domain(x, 30 + i * 9, 4.6, 5, i % 2 ? shade(col, 0.15) : col);
         s += tm(x, 68, col, { len: 12, tail: 10, w: 4.6 });
       });
@@ -140,7 +141,9 @@ export const receptors2 = [
     (c) => g(50, 52, 0, 0.92, igg(c, { hingeLen: 14 }))),
   ab('igg-fc', 'Fc fragment', ['fc', 'fc fragment', 'crystallizable fragment', 'fcrn', 'effector function', 'ch2', 'ch3'], { primary: '#3f7fd9', secondary: '#8cc3f5', accent: '#f6c945' },
     (c) => {
-      let s = line(42, 14, 58, 14, dark(c.primary, 0.35), 2) + line(42, 18, 58, 18, dark(c.primary, 0.35), 2);
+      // the two CH2–CH3 chains with the lower hinge and its disulfides
+      let s = ribbon('M41 60 V30 Q41 21 45.4 17 V7', c.primary, 2.2) + ribbon('M59 60 V30 Q59 21 54.6 17 V7', c.primary, 2.2);
+      s += disulfide(45.6, 10, 54.4) + disulfide(45.6, 14.5, 54.4);
       [[40, 34], [60, 34], [40, 62], [60, 62]].forEach(([x, y], i) => { s += domain(x, y, 9.5, 13, i % 2 ? shade(c.primary, 0.12) : c.primary); });
       return s + circle(50, 40, 2, c.accent, dark(c.accent, 0.4), 0.6) + circle(47, 44, 1.6, c.accent, dark(c.accent, 0.4), 0.5) + circle(53, 44, 1.6, c.accent, dark(c.accent, 0.4), 0.5);
     }, { w: 100, h: 84, size: 50 }),
@@ -148,7 +151,8 @@ export const receptors2 = [
     (c) => {
       let s = '';
       [[40, 64], [60, 64], [40, 88], [60, 88]].forEach(([x, y], i) => { s += domain(x, y, 9, 11.5, i % 2 ? shade(c.primary, 0.12) : c.primary); });
-      s += line(42, 48, 58, 48, dark(c.primary, 0.35), 2) + `<path d="M40 52 L28 38 M60 52 L72 38" stroke="${dark(c.primary, 0.3)}" stroke-width="2.6" stroke-linecap="round"/>`;
+      s = ribbon('M41 86 V60 Q41 54 45.2 51 V47.5 Q45 43 37 39 L24 30 L16 12', c.primary, 2.2) + ribbon('M59 86 V60 Q59 54 54.8 51 V47.5 Q55 43 63 39 L76 30 L84 12', c.primary, 2.2)
+        + disulfide(45.4, 49.6, 54.6) + s;
       s += domain(24, 30, 9, 10, c.accent, -30) + domain(16, 12, 8, 9.5, shade(c.accent, 0.15), -30) + domain(76, 30, 9, 10, c.accent, 30) + domain(84, 12, 8, 9.5, shade(c.accent, 0.15), 30);
       return s;
     }, { w: 100, h: 100, roles: { primary: 'Fc', secondary: 'Hinge', accent: 'Fused receptor / ligand' } }),

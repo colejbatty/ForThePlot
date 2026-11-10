@@ -3,7 +3,7 @@
 
 import {
   sphere, defs, blob, radial, path, circle, ellipse, gloss, speckle, ring, miniY, dark, light, shade, rng, n, smooth, line,
-  rim, membrane, nucleusDetail, mito, vesicle, granules, microvilli, cytoSpots,
+  rim, membrane, nucleusDetail, mito, vesicle, granules, cytoSpots, villous, lobed,
 } from './kit.js';
 import { mix } from '../../core/color.js';
 
@@ -12,18 +12,21 @@ const CELL_ROLES = { primary: 'Cytoplasm', secondary: 'Nucleus', accent: 'Granul
 export function lymphocyte(c, uid, o = {}) {
   const { seed = 3, ruffle = 0.022, nucleus = [52, 53, 28, 27], granules: nGran = 0, surface = null, r = 40, villi = 18, organelles = 3 } = o;
   const g = sphere(uid, 'b', c.primary);
-  const body = blob(50, 50, r, r, { n: 30, wobble: ruffle, seed });
+  // microvilli are part of the outline, so the membrane runs over them in one line
+  const body = villi
+    ? villous(50, 50, r - 0.6, r - 0.6, { count: Math.round(villi * 0.8), len: r * 0.042, w: r * 0.09, wobble: ruffle * 0.35, seed: seed + 9 })
+    : blob(50, 50, r, r, { n: 30, wobble: ruffle, seed });
   let s = defs(g);
-  if (villi) s += microvilli(50, 50, r, r, villi, c.primary, { len: r * 0.07, w: r * 0.075, seed: seed + 9 });
   if (surface) s += surface;
   s += path(body, g.url);
   // cytoplasm: a couple of mitochondria and vesicles where there is room
   const spots = cytoSpots(r, nucleus, organelles + (nGran ? 0 : 1), { min: r * 0.16 });
-  spots.forEach((p, i) => {
+  const org = nGran ? spots.slice(0, Math.max(1, organelles - 1)) : spots;
+  org.forEach((p, i) => {
     if (i % 2 === 0) s += mito(p.x, p.y, Math.min(9, p.gap * 0.62), p.a, shade(c.accent, 0.15));
     else s += vesicle(p.x, p.y, Math.min(2.6, p.gap * 0.2), shade(c.primary, 0.35));
   });
-  if (nGran) s += granulesIn(nGran, c, r, nucleus, seed);
+  if (nGran) s += granulesIn(nGran, c, r, nucleus, seed, org);
   s += rim(uid, 'br', body, c.primary, { op: 0.28 });
   s += membrane(body, c.primary, 2.2);
   const [nx, ny, nrx, nry] = nucleus;
@@ -33,13 +36,36 @@ export function lymphocyte(c, uid, o = {}) {
   return s;
 }
 
-// cytotoxic granules in the cytoplasm (around, not over, the nucleus)
-function granulesIn(count, c, r, nucleus, seed) {
-  const spots = cytoSpots(r, nucleus, count, { min: r * 0.12, skip: 0 });
-  return spots.map((p, i) => {
-    const rr = Math.min(3, p.gap * 0.22) * (0.8 + ((i * 37) % 10) / 25);
-    return circle(p.x, p.y, rr, c.accent, shade(c.accent, -0.38), n(rr * 0.24)) + circle(p.x - rr * 0.3, p.y - rr * 0.32, rr * 0.33, '#ffffff', 'none', 0, ' opacity="0.55"');
-  }).join('');
+// cytotoxic granules gathered in the cytoplasm on the roomy side of the nucleus (not over it)
+function granulesIn(count, c, r, nucleus, seed, avoid = []) {
+  const [nx, ny, nrx, nry] = nucleus;
+  const rand = rng(seed * 3 + 5);
+  const off = Math.hypot(50 - nx, 50 - ny);
+  const a0 = off > 1 ? Math.atan2(50 - ny, 50 - nx) : -2.3;
+  const spread = Math.min(Math.PI, 0.55 + count * 0.13);
+  const k = r / 40;
+  const out = [];
+  for (let t = 0; t < 900 && out.length < count; t++) {
+    const a = a0 + (rand() + rand() - 1) * spread;
+    const ux = Math.cos(a), uy = Math.sin(a);
+    let tn = 0;
+    for (let q = r; q > 0; q -= 0.5) {
+      if (((50 + ux * q - nx) / nrx) ** 2 + ((50 + uy * q - ny) / nry) ** 2 <= 1) { tn = q; break; }
+    }
+    const rr = (1.9 + rand() * 1.3) * k;
+    const lo = tn + rr + 1.4 * k, hi = r - rr - 2.8 * k;
+    if (hi < lo) continue;
+    const q = lo + rand() * (hi - lo), x = 50 + ux * q, y = 50 + uy * q;
+    if (avoid.some((p) => Math.hypot(p.x - x, p.y - y) < rr + 4.2)) continue;
+    if (out.every((o) => Math.hypot(o.x - x, o.y - y) > o.r + rr + 0.5)) out.push({ x, y, r: rr });
+  }
+  let body = '', lit = '', hi = '';
+  for (const g of out) {
+    body += `<circle cx="${n(g.x)}" cy="${n(g.y)}" r="${n(g.r)}"/>`;
+    lit += `<circle cx="${n(g.x - g.r * 0.14)}" cy="${n(g.y - g.r * 0.16)}" r="${n(g.r * 0.66)}"/>`;
+    hi += `<circle cx="${n(g.x - g.r * 0.34)}" cy="${n(g.y - g.r * 0.36)}" r="${n(g.r * 0.26)}"/>`;
+  }
+  return `<g fill="${shade(c.accent, -0.14)}" stroke="${shade(c.accent, -0.44)}" stroke-width="0.6">${body}</g><g fill="${shade(c.accent, 0.12)}">${lit}</g><g fill="#ffffff" opacity="0.6">${hi}</g>`;
 }
 
 export function surfaceYs(count, color, stroke, { r = 40, size = 11, rot = 0.2 } = {}) {
@@ -47,13 +73,15 @@ export function surfaceYs(count, color, stroke, { r = 40, size = 11, rot = 0.2 }
 }
 
 function surfaceCARs(count, color, scfv, { r = 40, size = 13 } = {}) {
+  // each CAR: a hinge/spacer stalk carrying the two variable domains of an scFv
   return ring(50, 50, r - 1, r - 1, count, 0.35).map((p) => {
     const ang = (p.a * 180) / Math.PI + 90;
+    const dom = (x, y, rot, col) => `<ellipse cx="${x}" cy="${n(y)}" rx="2.3" ry="3.3" transform="rotate(${rot} ${x} ${n(y)})" fill="${col}" stroke="${dark(scfv, 0.42)}" stroke-width="0.75"/>`
+      + `<circle cx="${n(x - 0.6)}" cy="${n(y - 1.2)}" r="0.7" fill="#fff" opacity="0.7"/>`;
     return `<g transform="translate(${n(p.x)} ${n(p.y)}) rotate(${n(ang)})">`
-      + `<path d="M0 2 L0 ${-size * 0.6}" stroke="${dark(color)}" stroke-width="3.4" stroke-linecap="round"/>`
-      + `<path d="M0 2 L0 ${-size * 0.6}" stroke="${color}" stroke-width="2" stroke-linecap="round"/>`
-      + `<ellipse cx="-2.1" cy="${-size * 0.78}" rx="2.6" ry="3.2" fill="${scfv}" stroke="${dark(scfv)}" stroke-width="0.9"/>`
-      + `<ellipse cx="2.1" cy="${-size * 0.86}" rx="2.6" ry="3.2" fill="${light(scfv, 0.25)}" stroke="${dark(scfv)}" stroke-width="0.9"/>`
+      + `<path d="M0 2 L0 ${-size * 0.56}" stroke="${dark(color, 0.3)}" stroke-width="2.8" stroke-linecap="round"/>`
+      + `<path d="M0 2 L0 ${-size * 0.56}" stroke="${light(color, 0.15)}" stroke-width="1.5" stroke-linecap="round"/>`
+      + dom(-2, -size * 0.78, -14, scfv) + dom(2, -size * 0.8, 14, light(scfv, 0.3))
       + '</g>';
   }).join('');
 }
@@ -72,16 +100,50 @@ function bean(cx, cy, w, h, rot = 0) {
 }
 
 export function lobedNucleus(c, uid, lobes, sw = 1.4) {
-  // lobes joined by thin chromatin bridges, each lobe with texture
+  // lobes joined by thin chromatin strands; each lobe is a little elongated and turned
+  // across the strand, so the nucleus reads as one segmented body rather than loose spheres
   let s = '';
   for (let i = 1; i < lobes.length; i++) {
-    s += line(lobes[i - 1][0], lobes[i - 1][1], lobes[i][0], lobes[i][1], dark(c.secondary, 0.35), 5.4);
-    s += line(lobes[i - 1][0], lobes[i - 1][1], lobes[i][0], lobes[i][1], c.secondary, 3.4);
+    const [x0, y0] = lobes[i - 1], [x1, y1] = lobes[i];
+    const mx = (x0 + x1) / 2, my = (y0 + y1) / 2, dx = x1 - x0, dy = y1 - y0;
+    const bow = (i % 2 ? 1 : -1) * 0.12;
+    const d = `M${n(x0)} ${n(y0)} Q${n(mx - dy * bow)} ${n(my + dx * bow)} ${n(x1)} ${n(y1)}`;
+    s += `<path d="${d}" fill="none" stroke="${dark(c.secondary, 0.46)}" stroke-width="${n(sw * 2.5)}" stroke-linecap="round"/>`
+      + `<path d="${d}" fill="none" stroke="${shade(c.secondary, 0.05)}" stroke-width="${n(sw * 1.3)}" stroke-linecap="round"/>`;
   }
   lobes.forEach(([x, y, r], i) => {
-    const d = blob(x, y, r, r * 0.92, { n: 8, wobble: 0.07, seed: 3 + i * 5, rot: i });
-    s += nucleusDetail(uid, `n${i}`, d, { cx: x, cy: y, rx: r, ry: r * 0.92 }, c.secondary, { seed: 3 + i, nucleolus: false, chroma: 0.55, sw });
+    const prev = lobes[i - 1] || lobes[i + 1] || [x + 1, y], next = lobes[i + 1] || lobes[i - 1] || [x - 1, y];
+    const ang = lobes.length > 1 ? (Math.atan2(next[1] - prev[1], next[0] - prev[0]) * 180) / Math.PI + 90 + (i % 2 ? 18 : -14) : 0;
+    const rx = r * 1.1, ry = r * 0.88;
+    const d = blob(x, y, rx, ry, { n: 9, wobble: 0.07, seed: 3 + i * 5, rot: i });
+    s += `<g transform="rotate(${n(ang)} ${n(x)} ${n(y)})">`
+      + nucleusDetail(uid, `n${i}`, d, { cx: x, cy: y, rx, ry }, c.secondary, { seed: 3 + i, nucleolus: false, chroma: 0.75, sw })
+      + '</g>';
   });
+  return s;
+}
+
+/**
+ * A biconcave red cell seen at an angle: a thick, rounded rim around a dimple that is shadowed
+ * under its near edge and lit on its far wall.
+ */
+export function rbcDisc(c, u, { cx = 50, cy = 35, rx = 46, ry = 29 } = {}) {
+  const g = sphere(u, 'b', c.primary, { cx: 36, cy: 24, r: 78, hi: 0.42, lo: -0.22 });
+  const dim = `${u}-d`;
+  const dimDef = `<linearGradient id="${dim}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${dark(c.secondary, 0.5)}"/><stop offset="0.22" stop-color="${dark(c.secondary, 0.3)}"/><stop offset="0.55" stop-color="${c.secondary}"/><stop offset="1" stop-color="${light(c.primary, 0.16)}"/></linearGradient>`;
+  const E = (k, ky = k) => `M${n(cx - rx * k)} ${n(cy)} A${n(rx * k)} ${n(ry * ky)} 0 1 0 ${n(cx + rx * k)} ${n(cy)} A${n(rx * k)} ${n(ry * ky)} 0 1 0 ${n(cx - rx * k)} ${n(cy)}Z`;
+  const body = E(1);
+  const dx = cx, dy = cy - ry * 0.05, drx = rx * 0.6, dry = ry * 0.52;
+  let s = defs(g, dimDef) + path(body, g.url);
+  // soft shoulder where the rim rolls into the dimple
+  s += ellipse(dx, dy, drx * 1.2, dry * 1.26, dark(c.primary, 0.2), 'none', 0, ' opacity="0.16"') + ellipse(dx, dy, drx * 1.1, dry * 1.13, dark(c.primary, 0.25), 'none', 0, ' opacity="0.2"');
+  s += ellipse(dx, dy, drx, dry, `url(#${dim})`);
+  // light on the far wall of the dimple
+  s += `<path d="M${n(dx - drx * 0.86)} ${n(dy + dry * 0.42)} Q${n(dx)} ${n(dy + dry * 1.22)} ${n(dx + drx * 0.86)} ${n(dy + dry * 0.42)}" fill="none" stroke="${light(c.primary, 0.5)}" stroke-width="2.2" opacity="0.55" stroke-linecap="round"/>`;
+  s += rim(u, 'br', body, c.primary, { op: 0.34, from: 0.6, glow: 0.26, glowW: 4 });
+  s += membrane(body, c.primary, 2);
+  // sheen along the near shoulder of the rim
+  s += `<path d="M${n(cx - rx * 0.74)} ${n(cy - ry * 0.42)} Q${n(cx - rx * 0.1)} ${n(cy - ry * 1.12)} ${n(cx + rx * 0.7)} ${n(cy - ry * 0.5)}" fill="none" stroke="#ffffff" stroke-width="2.6" opacity="0.3" stroke-linecap="round"/>`;
   return s;
 }
 
@@ -137,20 +199,26 @@ export const immuneCells = [
     (c, u) => lymphocyte(c, u, { seed: 13, r: 42, granules: 16, nucleus: [58, 54, 23, 25], organelles: 1 })),
   cell('macrophage', 'Macrophage', ['macrophage', 'phagocyte', 'm1', 'm2', 'tam', 'kupffer', 'innate', 'apc'], { primary: '#e7a66c', secondary: '#7b3b1d', accent: '#fbe3c6' },
     (c, u) => {
-      const g = sphere(u, 'b', c.primary, { r: 80 });
-      const radii = [47, 37, 44, 33, 41, 48, 36, 43, 34, 46, 38, 42, 35, 45];
-      const body = radial(50, 50, radii, { rot: 0.2, tension: 1.1 });
+      const g = sphere(u, 'b', c.primary, { r: 78, cx: 40, cy: 34 });
+      // an amoeboid body: a few broad pseudopods of different reach
+      const body = lobed(50, 51, 31, 29, [
+        { a: -42, h: 14, s: 30 }, { a: 32, h: 12, s: 14 }, { a: 96, h: 8, s: 22 }, { a: 158, h: 15, s: 16 }, { a: 214, h: 8, s: 26 }, { a: 282, h: 5, s: 14 },
+      ], { wobble: 0.05, seed: 6 });
       let s = defs(g) + path(body, g.url);
       // phagosomes with engulfed material, lysosomes, mitochondria
-      const phago = (x, y, r, sd) => vesicle(x, y, r, c.accent) + path(blob(x + r * 0.1, y + r * 0.12, r * 0.45, r * 0.38, { n: 6, wobble: 0.25, seed: sd }), dark(c.primary, 0.3), 'none', 0, ' opacity="0.7"');
-      s += phago(29, 61, 7, 2) + phago(69, 35, 5.5, 3) + phago(66, 70, 4.5, 4);
-      s += vesicle(37, 37, 3, c.accent) + vesicle(78, 52, 2.4, dark(c.primary, 0.15)) + vesicle(24, 44, 2.2, dark(c.primary, 0.15)) + vesicle(46, 78, 2.4, dark(c.primary, 0.15));
-      s += mito(56, 26, 8, 20, light(c.primary, 0.15)) + mito(78, 64, 7, 110, light(c.primary, 0.15)) + mito(34, 76, 7, -30, light(c.primary, 0.15));
+      const phago = (x, y, r, sd) => circle(x, y, r, light(c.accent, 0.1), dark(c.primary, 0.34), n(r * 0.16))
+        + circle(x - r * 0.08, y - r * 0.1, r * 0.78, light(c.accent, 0.5), 'none', 0, ' opacity="0.7"')
+        + path(blob(x + r * 0.08, y + r * 0.1, r * 0.5, r * 0.4, { n: 7, wobble: 0.28, seed: sd }), dark(c.primary, 0.32), 'none', 0, ' opacity="0.75"')
+        + circle(x - r * 0.42, y - r * 0.44, r * 0.2, '#ffffff', 'none', 0, ' opacity="0.75"');
+      s += phago(27, 60, 7.2, 2) + phago(71, 37, 5.6, 3) + phago(63, 69, 4.4, 4);
+      const lyso = dark(c.primary, 0.12);
+      s += vesicle(37, 35, 2.8, c.accent) + vesicle(75, 54, 2.2, lyso) + vesicle(24, 44, 2, lyso) + vesicle(47, 78, 2.2, lyso) + vesicle(58, 24, 1.7, lyso);
+      s += mito(46, 27, 8, 12, light(c.primary, 0.12)) + mito(77, 66, 7, 108, light(c.primary, 0.12)) + mito(37, 73, 7, -28, light(c.primary, 0.12));
       s += rim(u, 'br', body, c.primary, { op: 0.3, from: 0.62 });
       s += membrane(body, c.primary, 2.2);
       const nd = bean(52, 52, 30, 24, -15);
       s += nucleusDetail(u, 'n', nd, { cx: 52, cy: 50, rx: 14, ry: 10 }, c.secondary, { seed: 7 });
-      return s + gloss(36, 26, 11, 5.5, 0.45);
+      return s + gloss(35, 27, 11, 5.5, 0.45);
     }, { size: 130 }),
   cell('monocyte', 'Monocyte', ['monocyte', 'cd14', 'cd16', 'myeloid', 'blood', 'innate'], { primary: '#9fcbe9', secondary: '#4b4f9a', accent: '#ffffff' },
     (c, u) => {
@@ -168,20 +236,25 @@ export const immuneCells = [
     }),
   cell('dendritic-cell', 'Dendritic cell', ['dendritic', 'dc', 'cdc1', 'cdc2', 'pdc', 'apc', 'antigen presenting', 'langerhans'], { primary: '#7cc47c', secondary: '#2f6b3a', accent: '#f3c34a' },
     (c, u) => {
-      const g = sphere(u, 'b', c.primary, { r: 70 });
-      const radii = [];
-      const R = rng(4);
-      for (let i = 0; i < 7; i++) { radii.push(42 + R() * 7); radii.push(22 + R() * 4); }
-      const body = radial(50, 50, radii, { rot: 0.1, tension: 0.85 });
+      const g = sphere(u, 'b', c.primary, { r: 66, cx: 42, cy: 38, hi: 0.46 });
+      // a compact soma with long, tapering dendrites that curl a little at the tips
+      const arms = [
+        { a: -98, h: 27, s: 6.6, curl: 7 }, { a: -50, h: 22, s: 6.4, curl: -8 }, { a: -6, h: 28, s: 6.6, curl: 8 }, { a: 40, h: 21, s: 6.2, curl: -6 },
+        { a: 84, h: 26, s: 6.8, curl: 8 }, { a: 132, h: 22, s: 6.2, curl: -8 }, { a: 176, h: 28, s: 6.6, curl: 6 }, { a: 224, h: 20, s: 6.4, curl: -7 },
+      ];
+      const body = lobed(50, 50, 18.5, 17.5, arms, { K: 20, wobble: 0.03, seed: 4 });
       let s = defs(g) + path(body, g.url);
-      // peptide–MHC on the dendrite tips
-      ring(50, 50, 40, 40, 7, 0.1).forEach((p, i) => { s += circle(50 + Math.cos(p.a) * (38 + (i % 3)), 50 + Math.sin(p.a) * (38 + (i % 3)), 2.2, c.accent, dark(c.accent, 0.35), 0.6); });
-      s += vesicle(37, 34, 2.4, light(c.primary, 0.3)) + vesicle(64, 62, 2.2, light(c.primary, 0.3)) + vesicle(62, 36, 1.8, c.accent, 0.9) + vesicle(36, 62, 1.8, c.accent, 0.9);
-      s += rim(u, 'br', body, c.primary, { op: 0.3, from: 0.5 });
-      s += membrane(body, c.primary, 2);
-      const nd = blob(50, 50, 15, 13, { n: 8, wobble: 0.1, seed: 6 });
-      s += nucleusDetail(u, 'n', nd, { cx: 50, cy: 50, rx: 15, ry: 13 }, c.secondary, { seed: 5, chroma: 0.7 });
-      return s + gloss(43, 41, 6, 3.5, 0.45);
+      // endosomes and MHC-loading compartments in the soma, antigen carried out along the dendrites
+      s += vesicle(38, 39, 2.4, light(c.primary, 0.3)) + vesicle(62, 60, 2.1, light(c.primary, 0.3)) + vesicle(61, 39, 2, c.accent) + vesicle(39, 61, 1.9, c.accent);
+      s += rim(u, 'br', body, c.primary, { op: 0.26, from: 0.34, glowW: 3.2, glow: 0.34 });
+      arms.forEach((l, i) => {
+        const a = ((l.a + l.curl * 0.55) * Math.PI) / 180, q = 18 + l.h * 0.56;
+        s += circle(50 + Math.cos(a) * q, 50 + Math.sin(a) * q, i % 2 ? 1.2 : 1.45, c.accent, dark(c.accent, 0.42), 0.45);
+      });
+      s += membrane(body, c.primary, 1.9);
+      const nd = bean(50, 51, 27, 21, 12);
+      s += nucleusDetail(u, 'n', nd, { cx: 50, cy: 49.5, rx: 12.5, ry: 9 }, c.secondary, { seed: 5, chroma: 0.7 });
+      return s + gloss(42, 39, 6, 3, 0.4);
     }, { size: 130 }),
   cell('neutrophil', 'Neutrophil', ['neutrophil', 'pmn', 'granulocyte', 'polymorphonuclear', 'innate', 'net'], { primary: '#f4b6c4', secondary: '#6b3c8e', accent: '#d58aa5' },
     (c, u) => {
@@ -235,19 +308,7 @@ export const immuneCells = [
   {
     id: 'red-blood-cell', name: 'Red blood cell', category: 'Immune cells', tags: ['rbc', 'erythrocyte', 'blood'],
     colors: { primary: '#d94848', secondary: '#a82a2a' }, roles: { primary: 'Cell', secondary: 'Center' }, shape: 'ellipse', w: 100, h: 66, size: 80,
-    draw: (c, u) => {
-      // a biconcave disc seen at an angle: thick rim, dimpled center lit from the top left
-      const g = sphere(u, 'b', c.primary, { cx: 38, cy: 26, hi: 0.4, lo: -0.2 });
-      const dimple = `${u}-d`;
-      const dimDef = `<linearGradient id="${dimple}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${dark(c.secondary, 0.25)}"/><stop offset="0.55" stop-color="${c.secondary}"/><stop offset="1" stop-color="${light(c.primary, 0.3)}"/></linearGradient>`;
-      return defs(g, dimDef)
-        + ellipse(50, 35, 46, 29, g.url, dark(c.primary, 0.4), 2)
-        + ellipse(50, 33, 29, 16, `url(#${dimple})`, 'none', 0, ' opacity="0.92"')
-        + `<path d="M23 33 Q50 51 77 33" fill="none" stroke="${light(c.primary, 0.45)}" stroke-width="2.4" opacity="0.6" stroke-linecap="round"/>`
-        + `<path d="M24 31 Q50 15 76 31" fill="none" stroke="${dark(c.secondary, 0.35)}" stroke-width="1.6" opacity="0.5" stroke-linecap="round"/>`
-        + `<path d="M14 24 Q48 0 86 22" fill="none" stroke="#fff" stroke-width="3.2" opacity="0.4" stroke-linecap="round"/>`
-        + gloss(30, 16, 8, 3, 0.4, -12);
-    },
+    draw: (c, u) => rbcDisc(c, u) + gloss(27, 15.5, 8, 2.6, 0.42, -16),
   },
   {
     id: 'platelet', name: 'Platelets', category: 'Immune cells', tags: ['platelet', 'thrombocyte', 'clotting', 'blood'],

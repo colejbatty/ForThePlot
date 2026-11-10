@@ -6,32 +6,58 @@ import { defs, sphere, path, circle, ellipse, rect, line, domain, dark, light, s
 
 const AB_ROLES = { primary: 'Heavy chain', secondary: 'Light chain', accent: 'Variable / payload' };
 
+/** A chain drawn as an outlined ribbon along path `d` (linkers, hinges, stalks). */
+export function ribbon(d, color, w = 2.2, edge = 0.4) {
+  return `<path d="${d}" fill="none" stroke="${dark(color, edge)}" stroke-width="${n(w + 1.3)}" stroke-linecap="round" stroke-linejoin="round"/>`
+    + `<path d="${d}" fill="none" stroke="${shade(color, 0.12)}" stroke-width="${n(w)}" stroke-linecap="round" stroke-linejoin="round"/>`;
+}
+
+const DISULFIDE = '#e0aa1e';
+
+/** A disulfide bond between two chains, from (x0, y0) to (x1, y1). */
+export function disulfide(x0, y0, x1, y1 = y0) {
+  const d = `M${n(x0)} ${n(y0)} L${n(x1)} ${n(y1)}`;
+  return `<path d="${d}" stroke="${dark(DISULFIDE, 0.25)}" stroke-width="2" stroke-linecap="round"/><path d="${d}" stroke="${DISULFIDE}" stroke-width="1" stroke-linecap="round"/>`;
+}
+
 /** IgG drawn with hinge at (0,0), arms up, Fc down. */
 export function igg(c, { armB = null, fcDomains = 2, rx = 8, ry = 11.5, hingeLen = 6 } = {}) {
   const H = c.primary, L = c.secondary;
   const HB = armB ? armB.h : H, LB = armB ? armB.l : L;
   let s = '';
-  const arm = (sx, heavy, light) => {
-    const dx = 0.6 * sx, dy = -0.8, nx = 0.8 * sx, ny = 0.6;
-    const rot = 36.87 * sx;
-    const h1 = [dx * 17, dy * 17 - hingeLen], h2 = [dx * 36, dy * 36 - hingeLen];
-    const l1 = [h1[0] + nx * 15, h1[1] + ny * 15], l2 = [h2[0] + nx * 15, h2[1] + ny * 15];
-    let a = '';
-    a += line(sx * 5, 6, h1[0], h1[1], dark(heavy, 0.15), 3.2);
-    a += line(h1[0] + nx * 4, h1[1] + ny * 4, l1[0], l1[1], dark(light, 0.15), 2.4);
-    a += domain(h1[0], h1[1], rx, ry, heavy, rot) + domain(h2[0], h2[1], rx, ry, light === L && !armB ? shade(heavy, 0.18) : shade(heavy, 0.18), rot);
-    a += domain(l1[0], l1[1], rx * 0.92, ry * 0.92, light, rot) + domain(l2[0], l2[1], rx * 0.92, ry * 0.92, shade(light, 0.18), rot);
-    return a;
-  };
-  // Fc
   const fy = [16, 36, 56].slice(0, fcDomains);
-  s += line(-6, -2, -6, fy[fy.length - 1], dark(H, 0.15), 3.2) + line(6, -2, 6, fy[fy.length - 1], dark(H, 0.15), 3.2);
-  s += line(-5, 2, 5, 2, dark(H, 0.35), 1.8) + line(-5, 6, 5, 6, dark(H, 0.35), 1.8);
+  const geo = (sx) => {
+    const dx = 0.6 * sx, dy = -0.8, nx = 0.8 * sx, ny = 0.6;
+    const h1 = [dx * 17, dy * 17 - hingeLen], h2 = [dx * 36, dy * 36 - hingeLen];
+    return { rot: 36.87 * sx, h1, h2, l1: [h1[0] + nx * 15, h1[1] + ny * 15], l2: [h2[0] + nx * 15, h2[1] + ny * 15], nx, ny };
+  };
+  // heavy-chain backbone: Fc, up through the hinge, out along each Fab arm
+  const back = (sx, heavy) => {
+    const q = geo(sx);
+    return ribbon(`M${sx * 7.4} ${fy[fy.length - 1]} L${sx * 7.4} 13 Q${sx * 7.2} 4 ${sx * 3.3} 0.5 L${sx * 3.3} ${n(2 - hingeLen)} Q${sx * 3.3} ${n(-hingeLen - 3)} ${n(q.h1[0])} ${n(q.h1[1])} L${n(q.h2[0])} ${n(q.h2[1])}`, heavy, 2.3);
+  };
+  s += back(-1, H) + back(1, HB);
+  // inter-chain disulfides across the hinge
+  s += disulfide(-3.3, -0.6, 3.3) + (hingeLen >= 5 ? disulfide(-3.3, -hingeLen + 2.4, 3.3) : '');
   fy.forEach((y) => { s += domain(-8, y, rx * 0.95, ry * 0.92, H) + domain(8, y, rx * 0.95, ry * 0.92, HB); });
   // N-linked glycans tucked between the CH2 domains
-  const gy = fy[0] + 2;
-  s += `<g stroke="#7b8794" stroke-width="0.9" stroke-linecap="round" fill="none"><path d="M-2 ${gy} l-1.6 3.4 M-3.6 ${gy + 3.4} l-1.6 2.6 M-3.6 ${gy + 3.4} l1.2 3 M2 ${gy} l1.6 3.4 M3.6 ${gy + 3.4} l1.6 2.6 M3.6 ${gy + 3.4} l-1.2 3"/></g>`;
-  for (const [gx, gyy] of [[-5.2, gy + 6], [-2.4, gy + 6.4], [5.2, gy + 6], [2.4, gy + 6.4]]) s += `<circle cx="${gx}" cy="${gyy}" r="1.25" fill="#f6c945" stroke="#9a7a10" stroke-width="0.5"/>`;
+  const gy = fy[0] - 2.5;
+  let sticks = '', sugars = '';
+  for (const sx of [-1, 1]) {
+    const pts = [[sx * 1.9, gy], [sx * 1.3, gy + 3.1], [sx * 2.1, gy + 6.1]];
+    sticks += `M${pts.map((q) => `${n(q[0])} ${n(q[1])}`).join(' L')} `;
+    pts.forEach(([x, y], i) => { sugars += `<circle cx="${n(x)}" cy="${n(y)}" r="${i ? 1.25 : 1.4}" fill="${i ? '#f6c945' : '#5aa7e6'}" stroke="${i ? '#9a7a10' : '#2c5f98'}" stroke-width="0.45"/>`; });
+  }
+  s += `<path d="${sticks}" fill="none" stroke="#7b8794" stroke-width="0.7" stroke-linecap="round"/>${sugars}`;
+  const arm = (sx, heavy, light) => {
+    const q = geo(sx);
+    let a = '';
+    // light chain: its own backbone beside the heavy chain, joined to it by a disulfide
+    a += ribbon(`M${n(q.l1[0])} ${n(q.l1[1])} L${n(q.l2[0])} ${n(q.l2[1])}`, light, 1.8, 0.35);
+    a += domain(q.h1[0], q.h1[1], rx, ry, heavy, q.rot) + domain(q.h2[0], q.h2[1], rx, ry, shade(heavy, 0.18), q.rot);
+    a += domain(q.l1[0], q.l1[1], rx * 0.92, ry * 0.92, light, q.rot) + domain(q.l2[0], q.l2[1], rx * 0.92, ry * 0.92, shade(light, 0.18), q.rot);
+    return a;
+  };
   s += arm(-1, H, L) + arm(1, HB, LB);
   return s;
 }
@@ -62,10 +88,12 @@ export const antibodies = [
     (c) => g(50, 38, 0, 0.9, igg(c, { fcDomains: 3, hingeLen: 2 }))),
   ab('fab', 'Fab fragment', ['fab', 'fragment', 'antigen binding', 'antibody'], { primary: '#3f7fd9', secondary: '#8cc3f5', accent: '#f39a3d' },
     (c) => {
-      let s = '';
+      // heavy chain (VH–CH1) with the stub of its hinge, light chain (VL–CL) and the disulfide joining them
+      let s = ribbon('M26 30 L26 78 Q26 83 29 86', c.primary, 2.2) + ribbon('M46 34 L46 78 Q46 80.5 44 81.5', c.secondary, 1.8, 0.35);
+      s += disulfide(28, 81.6, 43.6, 81.6);
       s += domain(26, 60, 10, 14, c.primary) + domain(26, 30, 10, 14, shade(c.primary, 0.18));
-      s += domain(46, 64, 9.5, 13.5, c.secondary) + domain(46, 34, 9.5, 13.5, shade(c.secondary, 0.18));
-      return s + line(36, 74, 37, 74, dark(c.primary, 0.3), 2);
+      s += domain(46, 62, 9.5, 13.5, c.secondary) + domain(46, 33, 9.5, 13.5, shade(c.secondary, 0.18));
+      return s;
     }, { w: 70, h: 90, size: 60 }),
   ab('scfv', 'scFv', ['scfv', 'single chain', 'variable fragment', 'binder', 'antibody fragment'], { primary: '#3f7fd9', secondary: '#8cc3f5', accent: '#9aa5b1' },
     (c) => `<path d="M30 52 C 34 76, 58 76, 62 54" fill="none" stroke="${c.accent}" stroke-width="2.4" stroke-dasharray="3 3" stroke-linecap="round"/>`
@@ -83,8 +111,9 @@ export const antibodies = [
     (c) => {
       let s = g(50, 46, 0, 1, igg(c));
       [[28, 66], [72, 66], [16, 40], [84, 40]].forEach(([x, y]) => {
-        s += line(x + (x < 50 ? 8 : -8), y - 4, x, y, '#52606d', 1.6);
-        s += `<path d="${star(x, y, 5.5, 2.6, 6)}" fill="${c.accent}" stroke="${dark(c.accent)}" stroke-width="1"/>`;
+        s += line(x + (x < 50 ? 8 : -8), y - 4, x, y, '#52606d', 1.3);
+        s += `<path d="${star(x, y, 5.8, 2.9, 6)}" fill="${dark(c.accent, 0.1)}" stroke="${dark(c.accent, 0.45)}" stroke-width="0.9" stroke-linejoin="round"/>`
+          + `<path d="${star(x - 0.4, y - 0.5, 3.7, 2, 6)}" fill="${light(c.accent, 0.22)}"/>` + circle(x - 1.1, y - 1.3, 0.9, '#ffffff', 'none', 0, ' opacity="0.75"');
       });
       return s;
     }),
@@ -161,8 +190,8 @@ function rec(id, name, tags, colors, draw, extra = {}) {
 export const receptors = [
   rec('tcr', 'T cell receptor (αβ TCR)', ['tcr', 'alpha beta', 'antigen receptor', 't cell'], { primary: '#3f7fd9', secondary: '#7fb7f0', accent: '#f39a3d' },
     (c) => {
-      let s = line(20, 50, 20, 64, dark(c.primary, 0.1), 3) + line(40, 50, 40, 64, dark(c.secondary, 0.1), 3);
-      s += line(21, 58, 39, 58, '#52606d', 1.6);
+      let s = ribbon('M20 46 V64', c.primary, 1.9) + ribbon('M40 46 V64', c.secondary, 1.9, 0.35);
+      s += disulfide(21.6, 57.5, 38.4);
       s += tm(20, 64, c.primary) + tm(40, 64, c.secondary);
       s += domain(20, 40, 9.5, 12, c.primary) + domain(20, 16, 9.5, 12, shade(c.primary, 0.2));
       s += domain(40, 40, 9.5, 12, c.secondary) + domain(40, 16, 9.5, 12, shade(c.secondary, 0.2));
@@ -223,19 +252,19 @@ export const receptors = [
   rec('pd-l1', 'PD-L1', ['pd-l1', 'pdl1', 'cd274', 'b7-h1', 'checkpoint ligand', 'tumor'], { primary: '#8c6bd6', secondary: '#c3b3ef', accent: '#f6c945' },
     (c) => stalked(20, 4, [[11, 14], [10, 13, shade(c.primary, -0.08)]], c.primary, { stalk: 8 }), { w: 40, h: 100, size: 40 }),
   rec('ctla-4', 'CTLA-4', ['ctla-4', 'ctla4', 'cd152', 'checkpoint', 'inhibitory receptor', 'treg'], { primary: '#d9534f', secondary: '#f3a6a4', accent: '#f6c945' },
-    (c) => stalked(14, 10, [[10, 14]], c.primary, { stalk: 22 }) + stalked(36, 10, [[10, 14]], shade(c.primary, 0.12), { stalk: 22 }) + line(15, 44, 35, 44, '#52606d', 1.6),
+    (c) => stalked(14, 10, [[10, 14]], c.primary, { stalk: 22 }) + stalked(36, 10, [[10, 14]], shade(c.primary, 0.12), { stalk: 22 }) + disulfide(15.8, 44, 34.2),
     { w: 50, h: 100, size: 50 }),
   rec('cd28', 'CD28', ['cd28', 'costimulation', 'signal 2', 'costimulatory receptor'], { primary: '#6abf59', secondary: '#b5e0aa', accent: '#f6c945' },
-    (c) => stalked(14, 10, [[10, 14]], c.primary, { stalk: 22 }) + stalked(36, 10, [[10, 14]], shade(c.primary, 0.12), { stalk: 22 }) + line(15, 44, 35, 44, '#52606d', 1.6),
+    (c) => stalked(14, 10, [[10, 14]], c.primary, { stalk: 22 }) + stalked(36, 10, [[10, 14]], shade(c.primary, 0.12), { stalk: 22 }) + disulfide(15.8, 44, 34.2),
     { w: 50, h: 100, size: 50 }),
   rec('cd80-cd86', 'CD80 / CD86 (B7)', ['cd80', 'cd86', 'b7', 'b7-1', 'b7-2', 'costimulatory ligand', 'apc'], { primary: '#f6c945', secondary: '#fbe39a', accent: '#6abf59' },
     (c) => stalked(20, 4, [[11, 14], [10, 13, shade(c.primary, -0.12)]], c.primary, { stalk: 8 }), { w: 40, h: 100, size: 40 }),
   rec('car', 'Chimeric antigen receptor (CAR)', ['car', 'chimeric antigen receptor', 'scfv', '4-1bb', 'cd28', 'cd3 zeta', 'construct'], { primary: '#3f7fd9', secondary: '#9aa5b1', accent: '#f39a3d' },
     (c) => {
       let s = '';
-      s += line(25, 30, 25, 50, dark(c.secondary), 3);
+      s += ribbon('M25 26 V52', c.secondary, 1.9);
+      s += ribbon('M25 64 V112', c.secondary, 1.5);
       s += helix(21, 50, 8, 16, c.secondary, { sw: 1.2 });
-      s += line(25, 66, 25, 116, dark(c.secondary), 2.4);
       s += domain(25, 76, 8.5, 6.2, '#6abf59');
       for (let i = 0; i < 3; i++) s += domain(25, 91.5 + i * 9.5, 7.5, 4.4, c.accent);
       s += domain(16, 18, 9, 12, c.primary, -12) + domain(34, 18, 9, 12, shade(c.primary, 0.35), 12);
