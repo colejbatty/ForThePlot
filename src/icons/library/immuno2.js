@@ -1,8 +1,8 @@
 // Immunology depth: cell states and subsets, signaling molecules, innate immunity,
 // more receptors, and mouse experiment procedures.
 
-import { sphere, defs, blob, radial, path, circle, ellipse, rect, line, gloss, speckle, ring, miniY, dark, light, shade, rng, n, smooth, smoothOpen, domain, membraneStrip, rim, membrane, nucleusDetail, mito, vesicle, granules, helix } from './kit.js';
-import { lymphocyte, surfaceYs, immuneCells } from './cells.js';
+import { sphere, defs, blob, radial, path, circle, ellipse, rect, line, gloss, speckle, ring, miniY, dark, light, shade, rng, n, smooth, smoothOpen, domain, membraneStrip, rim, membrane, nucleusDetail, mito, vesicle, granules, helix, shape } from './kit.js';
+import { lymphocyte, surfaceYs, immuneCells, secreted, macrophage } from './cells.js';
 import { stalked, tm } from './molecules.js';
 import { organisms } from './lab.js';
 
@@ -29,11 +29,17 @@ export const cellStates = [
       const g = sphere(u, 'b', c.primary);
       const R = rng(19);
       const radii = Array.from({ length: 22 }, (_, i) => 41 + (i % 2 ? 3 : -1) + R() * 3);
-      const body = radial(50, 52, radii, { tension: 1.1 });
-      let s = defs(g);
+      const body = shape(u, 'o', radial(50, 52, radii, { tension: 1.1 }));
+      let s = defs(g, body);
       // activation sparks
-      s += `<g stroke="${dark(c.accent, 0.2)}" stroke-width="4.2" stroke-linecap="round"><path d="M80 12 l6 -7 M86 22 l9 -3 M72 6 l2 -8"/></g>`;
-      s += `<g stroke="${c.accent}" stroke-width="2.6" stroke-linecap="round"><path d="M80 12 l6 -7 M86 22 l9 -3 M72 6 l2 -8"/></g>`;
+      s += [[-64, 48.6, 54.2], [-46, 49.2, 55.6], [-28, 48.6, 54.2]].map(([deg, r0, r1]) => {
+        // a ray that widens as it leaves the cell, rounded at its far end
+        const a = (deg * Math.PI) / 180, ux = Math.cos(a), uy = Math.sin(a), w0 = 0.55, w1 = 1.7;
+        const P = (r, w) => `${n(50 + ux * r - uy * w)} ${n(52 + uy * r + ux * w)}`;
+        const d = `M${P(r0, -w0)} L${P(r1, -w1)} A${w1} ${w1} 0 0 1 ${P(r1, w1)} L${P(r0, w0)} A${w0} ${w0} 0 0 1 ${P(r0, -w0)}Z`;
+        return `<path d="${d}" fill="${c.accent}" stroke="${dark(c.accent, 0.36)}" stroke-width="0.9" stroke-linejoin="round"/>`
+          + `<path d="M${P(r0 + 1, -0.1)} L${P(r1 - 0.4, -0.7)}" stroke="#ffffff" stroke-width="0.6" stroke-linecap="round" opacity="0.6"/>`;
+      }).join('');
       s += path(body, g.url);
       // busy cytoplasm: free ribosomes, mitochondria, vesicles
       s += speckle(50, 52, 36, 36, 60, 0.8, dark(c.primary, 0.4), 4, 0.45);
@@ -50,8 +56,8 @@ export const cellStates = [
   cellIcon('t-cell-dying', 'Dying T cell (apoptotic)', ['apoptosis', 'activation-induced cell death', 'aicd', 'dying', 'dead', 't cell', 'fas'], { primary: '#9ab8d8', secondary: '#3c5fb4', accent: '#9ab8d8' },
     (c, u) => {
       const g = sphere(u, 'b', c.primary, { r: 80 });
-      const body = radial(46, 50, [31, 36, 29, 35, 28, 34, 30, 37, 29, 33, 28, 36], { tension: 1.3 });
-      let s = defs(g) + path(body, g.url);
+      const body = shape(u, 'o', radial(46, 50, [31, 36, 29, 35, 28, 34, 30, 37, 29, 33, 28, 36], { tension: 1.3 }));
+      let s = defs(g, body) + path(body, g.url);
       s += speckle(46, 50, 26, 26, 14, 1.4, dark(c.primary, 0.3), 3, 0.4);
       s += rim(u, 'br', body, c.primary);
       s += membrane(body, c.primary, 2);
@@ -79,8 +85,8 @@ export const cellStates = [
         const pinch = 1 - 0.32 * Math.exp(-((x * x) / 0.06));
         pts.push([50 + x * 47, 50 + y * 30 * pinch]);
       }
-      const body = smooth(pts);
-      let s = defs(g) + path(body, g.url);
+      const body = shape(u, 'o', smooth(pts));
+      let s = defs(g, body) + path(body, g.url);
       s += speckle(50, 50, 40, 22, 30, 0.8, dark(c.primary, 0.4), 4, 0.4);
       s += `<path d="M50 30 q-3 20 0 40" fill="none" stroke="${dark(c.primary, 0.3)}" stroke-width="1.4" opacity="0.6"/>`;
       s += mito(26, 30, 7, -30, light(c.accent, 0.1)) + mito(74, 70, 7, 150, light(c.accent, 0.1));
@@ -94,8 +100,8 @@ export const cellStates = [
   cellIcon('t-cell-migrating', 'Migrating T cell', ['migration', 'chemotaxis', 'polarized', 'uropod', 'lamellipodium', 'trafficking', 'extravasation', 't cell'], { primary: '#62a8ea', secondary: '#3c5fb4', accent: '#f1a340' },
     (c, u) => {
       const g = sphere(u, 'b', c.primary, { cx: 65, cy: 35, r: 80 });
-      const body = smooth([[8, 50], [16, 42], [30, 34], [50, 22], [72, 16], [90, 20], [104, 30], [112, 44], [108, 52], [114, 60], [104, 70], [86, 80], [62, 80], [40, 70], [24, 60], [14, 60]]);
-      let s = defs(g);
+      const body = shape(u, 'o', smooth([[8, 50], [16, 42], [30, 34], [50, 22], [72, 16], [90, 20], [104, 30], [112, 44], [108, 52], [114, 60], [104, 70], [86, 80], [62, 80], [40, 70], [24, 60], [14, 60]]));
+      let s = defs(g, body);
       // uropod microvilli at the rear
       s += `<g stroke="${dark(c.primary, 0.3)}" stroke-width="2.6" stroke-linecap="round"><path d="M10 48 l-6 -3 M9 55 l-7 1 M13 61 l-5 4"/></g>`;
       s += `<g stroke="${c.primary}" stroke-width="1.4" stroke-linecap="round"><path d="M10 48 l-6 -3 M9 55 l-7 1 M13 61 l-5 4"/></g>`;
@@ -111,19 +117,19 @@ export const cellStates = [
       s += `<path d="M98 26 l6 -4 M108 40 l7 -1 M106 64 l6 4" stroke="${dark(c.primary, 0.2)}" stroke-width="2" stroke-linecap="round"/>`;
       return s + gloss(78, 30, 13, 5.5, 0.45, -10);
     }, { w: 120, h: 90, size: 130, body: 0.75 }),
-  variant('t-cell-cd4', 'th1-cell', 'Th1 cell', ['th1', 't-bet', 'ifn-gamma', 'type 1', 'helper', 'cd4', 't cell'], { primary: '#ee7b6e', secondary: '#8a2f3e', accent: '#f6c945' }),
-  variant('t-cell-cd4', 'th2-cell', 'Th2 cell', ['th2', 'gata3', 'il-4', 'il-13', 'type 2', 'allergy', 'helper', 'cd4', 't cell'], { primary: '#f2c14e', secondary: '#9a6a12', accent: '#e8724a' }),
-  variant('t-cell-cd4', 'th17-cell', 'Th17 cell', ['th17', 'rorgt', 'il-17', 'type 3', 'helper', 'cd4', 't cell'], { primary: '#f39a3d', secondary: '#8a4a12', accent: '#f6c945' }),
-  variant('t-cell-cd4', 'tfh-cell', 'T follicular helper (Tfh) cell', ['tfh', 'bcl6', 'cxcr5', 'germinal center', 'il-21', 'helper', 'cd4', 't cell'], { primary: '#4fc3d9', secondary: '#1f6f86', accent: '#f6c945' }),
-  variant('t-cell', 'gd-t-cell', 'γδ T cell', ['gamma delta', 'gd t', 'unconventional', 'innate-like', 'tcr gd', 't cell'], { primary: '#a3c95f', secondary: '#4f6f1f', accent: '#f1a340' }),
-  variant('t-cell', 'mait-cell', 'MAIT cell', ['mait', 'mr1', 'unconventional', 'innate-like', 'mucosal', 't cell'], { primary: '#f08bb4', secondary: '#8a2f5e', accent: '#f6c945' }),
+  variant('t-cell-cd4', 'th1-cell', 'Th1 cell', ['th1', 't-bet', 'ifn-gamma', 'type 1', 'helper', 'cd4', 't cell'], { primary: '#ee7b6e', secondary: '#8a2f3e', accent: '#f6c945' }, { draw: (c, u) => lymphocyte(c, u, { seed: 17, surface: secreted('dot', c.accent) }), roles: { primary: 'Cytoplasm', secondary: 'Nucleus', accent: 'Cytokines' } }),
+  variant('t-cell-cd4', 'th2-cell', 'Th2 cell', ['th2', 'gata3', 'il-4', 'il-13', 'type 2', 'allergy', 'helper', 'cd4', 't cell'], { primary: '#f2c14e', secondary: '#9a6a12', accent: '#e8724a' }, { draw: (c, u) => lymphocyte(c, u, { seed: 17, surface: secreted('diamond', c.accent) }), roles: { primary: 'Cytoplasm', secondary: 'Nucleus', accent: 'Cytokines' } }),
+  variant('t-cell-cd4', 'th17-cell', 'Th17 cell', ['th17', 'rorgt', 'il-17', 'type 3', 'helper', 'cd4', 't cell'], { primary: '#f39a3d', secondary: '#8a4a12', accent: '#f6c945' }, { draw: (c, u) => lymphocyte(c, u, { seed: 17, surface: secreted('triangle', c.accent) }), roles: { primary: 'Cytoplasm', secondary: 'Nucleus', accent: 'Cytokines' } }),
+  variant('t-cell-cd4', 'tfh-cell', 'T follicular helper (Tfh) cell', ['tfh', 'bcl6', 'cxcr5', 'germinal center', 'il-21', 'helper', 'cd4', 't cell'], { primary: '#4fc3d9', secondary: '#1f6f86', accent: '#f6c945' }, { draw: (c, u) => lymphocyte(c, u, { seed: 17, surface: secreted('rod', c.accent) }), roles: { primary: 'Cytoplasm', secondary: 'Nucleus', accent: 'Cytokines' } }),
+  variant('t-cell', 'gd-t-cell', 'γδ T cell', ['gamma delta', 'gd t', 'unconventional', 'innate-like', 'tcr gd', 't cell'], { primary: '#a3c95f', secondary: '#4f6f1f', accent: '#f1a340' }, { draw: (c, u) => lymphocyte(c, u, { seed: 3, granules: 6, villi: 0, nucleus: [54, 54, 26, 25] }), roles: { primary: 'Cytoplasm', secondary: 'Nucleus', accent: 'Granules' } }),
+  variant('t-cell', 'mait-cell', 'MAIT cell', ['mait', 'mr1', 'unconventional', 'innate-like', 'mucosal', 't cell'], { primary: '#f08bb4', secondary: '#8a2f5e', accent: '#f6c945' }, { draw: (c, u) => lymphocyte(c, u, { seed: 3, surface: secreted('hex', c.accent) }), roles: { primary: 'Cytoplasm', secondary: 'Nucleus', accent: 'Metabolite antigens' } }),
   variant('nk-cell', 'ilc', 'Innate lymphoid cell (ILC)', ['ilc', 'ilc1', 'ilc2', 'ilc3', 'innate lymphoid', 'tissue resident'], { primary: '#d39be0', secondary: '#6b3c8e', accent: '#8c3fa0' }),
   variant('b-cell', 'memory-b-cell', 'Memory B cell', ['memory b', 'cd27', 'class switched', 'b cell'], { primary: '#f7d08a', secondary: '#a8661c', accent: '#d4573f' }),
   cellIcon('gc-b-cell', 'Germinal center B cell', ['germinal center', 'gc b', 'centroblast', 'centrocyte', 'somatic hypermutation', 'aid', 'b cell'], { primary: '#f2b54f', secondary: '#7d4a12', accent: '#d4573f' },
     (c, u) => {
       const g = sphere(u, 'b', c.primary);
-      const body = blob(50, 50, 42, 41, { n: 28, wobble: 0.025, seed: 33 });
-      let s = defs(g) + surfaceYs(6, c.accent, dark(c.accent), { r: 41, size: 10 }) + path(body, g.url);
+      const body = shape(u, 'o', blob(50, 50, 42, 41, { n: 28, wobble: 0.025, seed: 33 }));
+      let s = defs(g, body) + surfaceYs(6, c.accent, dark(c.accent), { r: 41, size: 10 }) + path(body, g.url);
       s += speckle(50, 50, 38, 38, 40, 0.8, dark(c.primary, 0.38), 4, 0.45);
       s += mito(24, 36, 7, -60, light(c.primary, 0.3)) + mito(76, 66, 7, 120, light(c.primary, 0.3));
       s += rim(u, 'br', body, c.primary);
@@ -133,8 +139,25 @@ export const cellStates = [
       s += circle(42, 60, 3.4, dark(c.secondary, 0.1), 'none', 0, ' opacity="0.8"');
       return s + gloss(32, 26, 11, 5.5, 0.45);
     }, { size: 120 }),
-  variant('macrophage', 'm1-macrophage', 'M1 macrophage', ['m1', 'classically activated', 'inflammatory', 'ifn-gamma', 'lps', 'macrophage'], { primary: '#e57373', secondary: '#7b1f2a', accent: '#fde0dc' }),
-  variant('macrophage', 'm2-macrophage', 'M2 macrophage', ['m2', 'alternatively activated', 'tam', 'il-4', 'repair', 'macrophage'], { primary: '#6fbfa0', secondary: '#1f5f4a', accent: '#e0f4ec' }),
+  variant('macrophage', 'm1-macrophage', 'M1 macrophage', ['m1', 'classically activated', 'inflammatory', 'ifn-gamma', 'lps', 'macrophage'], { primary: '#e57373', secondary: '#7b1f2a', accent: '#fde0dc' }, {
+    draw: (c, u) => macrophage(c, u, {
+      base: [33, 31], wobble: 0.03, seed: 11,
+      lobes: [-78, -44, -12, 22, 58, 96, 132, 166, 204, 240, 276].map((a, i) => ({ a: a + (i % 2 ? 5 : -4), h: 7.5 + (i % 3) * 2, s: 6.6 + (i % 2) * 1.8, curl: i % 2 ? 5 : -5 })),
+      phagos: [[30, 58, 5.2, 2], [69, 39, 4.6, 3]],
+      lysos: [[38, 36, 2.4, 1], [72, 56, 2], [30, 44, 1.8], [48, 75, 2], [59, 27, 1.6], [64, 68, 2.2, 1]],
+      mitos: [[47, 29, 7, 12], [70, 67, 6, 100], [39, 70, 6, -28]],
+      granules: granules(50, 52, 24, 22, 16, 1.25, dark(c.primary, 0.3), 4, { glint: 0.35 }),
+    }),
+  }),
+  variant('macrophage', 'm2-macrophage', 'M2 macrophage', ['m2', 'alternatively activated', 'tam', 'il-4', 'repair', 'macrophage'], { primary: '#6fbfa0', secondary: '#1f5f4a', accent: '#e0f4ec' }, {
+    draw: (c, u) => macrophage(c, u, {
+      base: [36, 33], wobble: 0.035, seed: 9,
+      lobes: [{ a: -38, h: 8, s: 30 }, { a: 48, h: 5, s: 24 }, { a: 122, h: 9, s: 32 }, { a: 214, h: 8, s: 38 }],
+      phagos: [[27, 54, 8.6, 2], [70, 34, 7.4, 3], [66, 70, 6.6, 4], [38, 76, 4.6, 5]],
+      lysos: [[40, 31, 2.4, 1], [79, 54, 2]],
+      mitos: [[50, 24, 7, 8], [50, 82, 6, 5]],
+    }),
+  }),
   cellIcon('neutrophil-net', 'Neutrophil NETosis', ['net', 'netosis', 'neutrophil extracellular trap', 'dna web', 'neutrophil', 'innate'], { primary: '#f4b6c4', secondary: '#6b3c8e', accent: '#d58aa5' },
     (c, u) => {
       const g = sphere(u, 'b', c.primary);
@@ -154,8 +177,8 @@ export const cellStates = [
         if (i) strands += `<path d="M${n(pts[3][0])} ${n(pts[3][1])} L${n(pts[3][0] - 6)} ${n(pts[3][1] - 10)}" stroke="${c.secondary}" stroke-width="0.7" opacity="0.6"/>`;
       }
       s += `<g fill="none" stroke-linecap="round" opacity="0.9">${strands}</g>${beads}`;
-      const body = radial(38, 50, [30, 33, 30, 34, 31, 26, 22, 26, 30, 33], { tension: 1.1 });
-      s += path(body, g.url);
+      const body = shape(u, 'o', radial(38, 50, [30, 33, 30, 34, 31, 26, 22, 26, 30, 33], { tension: 1.1 }));
+      s += defs(body) + path(body, g.url);
       s += speckle(36, 50, 22, 24, 30, 0.9, c.accent, 5, 0.8);
       s += rim(u, 'br', body, c.primary);
       s += membrane(body, c.primary, 2.2);

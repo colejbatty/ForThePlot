@@ -74,8 +74,8 @@ for (const plat of PLATFORMS) {
 // 4. Icon
 const { svgToPng } = await import('../src/node/png.js');
 // a small plot: axes and three rising bars with error bars
-const iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="256" height="256"><rect width="64" height="64" rx="14" fill="#0f6b73"/><path d="M14 12v38h38" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="20" y="36" width="7" height="11" rx="1.5" fill="#ffffff"/><rect x="31" y="28" width="7" height="19" rx="1.5" fill="#ffffff"/><rect x="42" y="18" width="7" height="29" rx="1.5" fill="#ff7aa8"/><path d="M23.5 36v-6M20.5 30h6M34.5 28v-7M31.5 21h6M45.5 18v-7M42.5 11h6" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/></svg>';
-fs.writeFileSync(path.join(out, 'icon.png'), await svgToPng(iconSvg, { width: 256 }));
+const iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="512" height="512"><rect width="64" height="64" rx="14" fill="#0f6b73"/><path d="M14 12v38h38" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="20" y="36" width="7" height="11" rx="1.5" fill="#ffffff"/><rect x="31" y="28" width="7" height="19" rx="1.5" fill="#ffffff"/><rect x="42" y="18" width="7" height="29" rx="1.5" fill="#ff7aa8"/><path d="M23.5 36v-6M20.5 30h6M34.5 28v-7M31.5 21h6M45.5 18v-7M42.5 11h6" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/></svg>';
+fs.writeFileSync(path.join(out, 'icon.png'), await svgToPng(iconSvg, { width: 512 }));
 
 // 5. Manifest
 const manifest = {

@@ -40,6 +40,21 @@ export function sphere(uid, key, c, { cx = 38, cy = 32, r = 72, hi = 0.5, lo = -
 }
 
 /**
+ * Define an outline once so every layer drawn from it (fill, shading, clip, membrane) can
+ * refer to it instead of repeating the path. Returns { d, id, def }: put it in defs(), then
+ * pass it wherever a path `d` is accepted. It still reads as its path string when interpolated.
+ */
+export function shape(uid, key, d) {
+  const id = `${uid}-${key}`;
+  return { d: String(d), id, def: `<path id="${id}" d="${d}"/>`, toString() { return this.d; } };
+}
+
+/** One layer of an outline: a <path> for a plain path string, a <use> for a shape(). */
+export function layer(d, attrs) {
+  return d && d.id ? `<use xlink:href="#${d.id}" ${attrs}/>` : `<path d="${d}" ${attrs}/>`;
+}
+
+/**
  * Inner shading along the edge of a shape (ambient occlusion), as an overlay path, plus a thin
  * band of light just inside the edge so the body reads as translucent rather than solid.
  * `d` is the shape's path; the shadow fades in from `from` (0–1 of the radius).
@@ -48,19 +63,16 @@ export function rim(uid, key, d, c, { op = 0.32, from = 0.66, cx = 54, cy = 56, 
   const id = `${uid}-${key}`;
   const dk = tone(c, -0.55);
   let s = `<defs><radialGradient id="${id}" cx="${cx}%" cy="${cy}%" r="${r}%"><stop offset="${from}" stop-color="${dk}" stop-opacity="0"/><stop offset="${n2(from + (1 - from) * 0.6)}" stop-color="${dk}" stop-opacity="${n2(op * 0.45)}"/><stop offset="1" stop-color="${dk}" stop-opacity="${op}"/></radialGradient>`
-    + (glow ? `<clipPath id="${id}-c"><path d="${d}"/></clipPath>` : '') + '</defs>'
-    + `<path d="${d}" fill="url(#${id})"/>`;
-  if (glow) {
-    s += `<g clip-path="url(#${id}-c)" fill="none" stroke="${shade(c, 0.62)}" stroke-linejoin="round">`
-      + `<path d="${d}" stroke-width="${glowW}" opacity="${n2(glow * 1.12)}"/></g>`;
-  }
+    + (glow ? `<clipPath id="${id}-c">${layer(d, '')}</clipPath>` : '') + '</defs>'
+    + layer(d, `fill="url(#${id})"`);
+  if (glow) s += `<g clip-path="url(#${id}-c)">${layer(d, `fill="none" stroke="${shade(c, 0.62)}" stroke-linejoin="round" stroke-width="${glowW}" opacity="${n2(glow * 1.12)}"`)}</g>`;
   return s;
 }
 
 /** A membrane outline: a dark edge with a fine light line inside it, like a bilayer seen edge-on. */
 export function membrane(d, c, sw = 2.2, { inner = 0.5, op = 0.6 } = {}) {
-  return `<path d="${d}" fill="none" stroke="${shade(c, -0.46)}" stroke-width="${sw}" stroke-linejoin="round"/>`
-    + `<path d="${d}" fill="none" stroke="${shade(c, inner)}" stroke-width="${n2(sw * 0.24)}" stroke-linejoin="round" opacity="${op}"/>`;
+  return layer(d, `fill="none" stroke="${shade(c, -0.46)}" stroke-width="${sw}" stroke-linejoin="round"`)
+    + layer(d, `fill="none" stroke="${shade(c, inner)}" stroke-width="${n2(sw * 0.24)}" stroke-linejoin="round" opacity="${op}"`);
 }
 
 /** Linear gradient, top-to-bottom by default. */
@@ -204,7 +216,7 @@ export function ellipse(cx, cy, rx, ry, fill, stroke = 'none', sw = 0, extra = '
 }
 
 export function path(d, fill, stroke = 'none', sw = 0, extra = '') {
-  return `<path d="${d}" fill="${fill}"${stroke !== 'none' ? ` stroke="${stroke}" stroke-width="${sw}" stroke-linejoin="round" stroke-linecap="round"` : ''}${extra}/>`;
+  return layer(d, `fill="${fill}"${stroke !== 'none' ? ` stroke="${stroke}" stroke-width="${sw}" stroke-linejoin="round" stroke-linecap="round"` : ''}${extra}`);
 }
 
 export function rect(x, y, w, h, rx, fill, stroke = 'none', sw = 0, extra = '') {
@@ -283,6 +295,21 @@ export function domain(cx, cy, rx, ry, color, rot = 0, sw = 1.6) {
     + '</g>';
 }
 
+/**
+ * A globular protein domain (kinase lobe, integrin head, cytokine trimer…): a lit, organic blob
+ * with edge shading, a band of light inside its outline and a glint, to sit beside domain() beads.
+ */
+export function globule(uid, key, x, y, rx, ry, c, seed = 3) {
+  const g = sphere(uid, key, c, { hi: 0.48, lo: -0.16, cx: 36, cy: 30, r: 74 });
+  const d = shape(uid, `${key}-o`, blob(x, y, rx, ry, { n: 9, wobble: 0.1, seed }));
+  const m = Math.min(rx, ry);
+  const gx = x - rx * 0.34, gy = y - ry * 0.42;
+  return defs(g, d) + layer(d, `fill="${g.url}"`)
+    + rim(uid, `${key}-r`, d, c, { op: 0.3, from: 0.52, glow: 0.3, glowW: n2(Math.min(3.4, m * 0.34)) })
+    + layer(d, `fill="none" stroke="${tone(c, -0.46, 0.6)}" stroke-width="${n2(Math.max(0.9, Math.min(1.3, m * 0.16)))}" stroke-linejoin="round"`)
+    + `<g fill="#ffffff" transform="rotate(-28 ${n2(gx)} ${n2(gy)})"><ellipse cx="${n2(gx)}" cy="${n2(gy)}" rx="${n2(rx * 0.3)}" ry="${n2(ry * 0.17)}" opacity="0.22"/><ellipse cx="${n2(gx)}" cy="${n2(gy)}" rx="${n2(rx * 0.17)}" ry="${n2(ry * 0.09)}" opacity="0.75"/></g>`;
+}
+
 /** An α-helix drawn as a rounded rod: lit down one side, shaded down the other, with slanted turns. */
 export function helix(x, y, w, h, color, { turns = null, sw = 1.2, rot = 0 } = {}) {
   const k = turns ?? Math.max(2, Math.round(h / (w * 0.8)));
@@ -343,7 +370,8 @@ export function nucleusDetail(uid, key, d, { cx, cy, rx, ry }, c, { seed = 3, nu
   const pw = m * (0.3 + 0.12 * k);
   const dash = [];
   for (let i = 0; i < 7; i++) dash.push(n2(m * (0.08 + rand() * 0.55 * k)), n2(pw + m * (0.1 + rand() * 0.42 / k)));
-  let inner = `<path d="${d}" fill="none" stroke="${dk}" stroke-width="${n2(pw)}" stroke-linecap="round" stroke-dasharray="${dash.join(' ')}" stroke-dashoffset="${n2(rand() * m * 4)}" opacity="${n2(Math.min(0.5, 0.26 + 0.1 * k))}"/>`;
+  const P = d && d.id ? d : shape(uid, `${key}-o`, d);
+  let inner = layer(P, `fill="none" stroke="${dk}" stroke-width="${n2(pw)}" stroke-linecap="round" stroke-dasharray="${dash.join(' ')}" stroke-dashoffset="${n2(rand() * m * 4)}" opacity="${n2(Math.min(0.5, 0.26 + 0.1 * k))}"`);
   // soft mottling: darker condensed regions and paler open chromatin
   let dkB = '', ltB = '';
   const clumps = Math.round(3 + 2.4 * k), pale = 3;
@@ -357,8 +385,8 @@ export function nucleusDetail(uid, key, d, { cx, cy, rx, ry }, c, { seed = 3, nu
   }
   inner += `<g fill="${lt}" opacity="0.16">${ltB}</g><g fill="${dk}" opacity="${n2(0.16 + 0.07 * k)}">${dkB}</g>`;
   inner += speckle(cx, cy, rx * 0.74, ry * 0.74, Math.round(5 * k), m * 0.028, shade(c, -0.42), seed + 2, 0.3);
-  let s = `<defs>${g.def}<clipPath id="${clip}"><path d="${d}"/></clipPath></defs>`;
-  s += `<path d="${d}" fill="${g.url}"/>`;
+  let s = `<defs>${g.def}${d && d.id ? '' : P.def}<clipPath id="${clip}">${layer(P, '')}</clipPath></defs>`;
+  s += layer(P, `fill="${g.url}"`);
   s += `<g clip-path="url(#${clip})">${inner}</g>`;
   if (nucleolus) {
     const nx = cx + rx * 0.2, ny = cy + ry * 0.14, nr = m * (nucleolus === 'big' ? 0.22 : 0.15);
@@ -367,8 +395,8 @@ export function nucleusDetail(uid, key, d, { cx, cy, rx, ry }, c, { seed = 3, nu
     s += ellipse(nx + nr * 0.1, ny + nr * 0.14, nr * 0.6, nr * 0.52, shade(c, -0.4), 'none', 0, ' opacity="0.22"');
     s += ellipse(nx - nr * 0.3, ny - nr * 0.36, nr * 0.34, nr * 0.2, shade(c, 0.3), 'none', 0, ' opacity="0.4"');
   }
-  s += rim(uid, `${key}-rim`, d, c, { op: 0.34, from: 0.58, glow: 0.22, glowW: n2(Math.max(1.6, m * 0.16)) });
-  s += membrane(d, c, sw, { inner: 0.42, op: 0.5 });
+  s += rim(uid, `${key}-rim`, P, c, { op: 0.34, from: 0.58, glow: 0.22, glowW: n2(Math.max(1.6, m * 0.16)) });
+  s += membrane(P, c, sw, { inner: 0.42, op: 0.5 });
   if (m > 4.5) s += gloss(cx - rx * 0.36, cy - ry * 0.5, rx * 0.26, ry * 0.11, 0.26, -24);
   return s;
 }

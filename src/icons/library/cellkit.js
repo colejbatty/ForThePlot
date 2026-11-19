@@ -4,7 +4,7 @@
 
 import {
   sphere, defs, blob, path, circle, ellipse, gloss, speckle, dark, light, shade, rng, n, smooth, smoothOpen,
-  rim, membrane, nucleusDetail, mito, vesicle, granules, microvilli,
+  rim, membrane, nucleusDetail, mito, vesicle, granules, microvilli, shape as shapeDef, layer,
 } from './kit.js';
 import { lobedNucleus } from './cells.js';
 
@@ -28,7 +28,12 @@ function bbox(pts) {
   return { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, rx: (x1 - x0) / 2, ry: (y1 - y0) / 2 };
 }
 
-const shapeOf = (pts, tension = 1) => ({ d: smooth(pts, tension), pts, ...bbox(pts) });
+const shapeOf = (pts, tension = 1) => ({ d: smooth(pts, tension), pts, tension, ...bbox(pts) });
+
+/** Signed area of a polygon (positive when its points run clockwise on screen). */
+const area = (pts) => pts.reduce((a, p, i) => { const q = pts[(i + 1) % pts.length]; return a + (p[0] * q[1] - q[0] * p[1]); }, 0) / 2;
+/** Points in clockwise order, so outlines drawn together as one path fill as their union. */
+const clockwise = (pts) => (area(pts) < 0 ? [...pts].reverse() : pts);
 
 /** Ellipse-ish outline with a little wobble; rot turns it. */
 export function round(cx, cy, rx, ry = rx, { wobble = 0.025, seed = 1, k = 26, rot = 0 } = {}) {
@@ -171,10 +176,11 @@ export function rer(e, c, { a0 = 120, a1 = 300, count = 4, gap = 3.6, start = 3,
     const p0 = [e.cx + rx * Math.cos(A0), e.cy + ry * Math.sin(A0)], p1 = [e.cx + rx * Math.cos(A1), e.cy + ry * Math.sin(A1)];
     const large = A1 - A0 > Math.PI ? 1 : 0;
     arcs += `M${n(p0[0])} ${n(p0[1])} A${n(rx)} ${n(ry)} 0 ${large} 1 ${n(p1[0])} ${n(p1[1])} `;
-    const stepA = (gap * 0.55) / Math.max(rx, ry);
-    for (let a = A0 + stepA; a < A1; a += stepA) ribo += `<circle cx="${n(e.cx + (rx + sw * 0.8) * Math.cos(a))}" cy="${n(e.cy + (ry + sw * 0.8) * Math.sin(a))}" r="${n(sw * 0.48)}"/>`;
+    const stepA = (gap * 0.95) / Math.max(rx, ry);
+    for (let a = A0 + stepA; a < A1; a += stepA) ribo += `<circle cx="${n(e.cx + (rx + sw * 0.95) * Math.cos(a))}" cy="${n(e.cy + (ry + sw * 0.95) * Math.sin(a))}" r="${n(sw * 0.44)}"/>`;
   }
-  return `<path d="${arcs}" fill="none" stroke="${dark(c, 0.22)}" stroke-width="${sw}" stroke-linecap="round" opacity="${op}"/><g fill="${dark(c, 0.45)}" opacity="${op}">${ribo}</g>`;
+  // each cisterna is a flattened sac: a soft dark band with a pale lumen, ribosomes along its outer face
+  return `<g fill="none" stroke-linecap="round"><path d="${arcs}" stroke="${dark(c, 0.26)}" stroke-width="${n(sw * 1.5)}" opacity="${n(op * 0.85)}"/><path d="${arcs}" stroke="${light(c, 0.42)}" stroke-width="${n(sw * 0.6)}" opacity="${n(Math.min(1, op * 1.25))}"/></g><g fill="${dark(c, 0.45)}" opacity="${n(op * 0.85)}">${ribo}</g>`;
 }
 
 /** Golgi stack: curved cisternae with budding vesicles. */
@@ -234,7 +240,7 @@ export function taper(points, w0, w1 = 0.6) {
     Rr.push([p[0] + dy * w, p[1] - dx * w]);
   }
   const tip = points[N - 1];
-  return smooth([...L, tip, ...Rr.reverse()], 0.8);
+  return smooth(clockwise([...L, tip, ...Rr.reverse()]), 0.8);
 }
 
 /**
@@ -278,6 +284,24 @@ export function processes(list, c, { sw = 2, fill = null, hi = true } = {}) {
     + (hi ? `<g fill="none" stroke="${shade(c, 0.32)}" stroke-width="0.9" stroke-linecap="round" opacity="0.55">${sp.map((p) => `<path d="${smoothOpen(p.slice(0, -1))}"/>`).join('')}</g>` : '');
 }
 
+/**
+ * Draw a body made of several overlapping outlines (a soma and its processes) as one cell: a
+ * single membrane around their union, a band of light just inside it, and one fill across the
+ * whole body. D is a shape() holding every outline as one compound path. The outlines are the
+ * cores; the membrane sits just outside them, so thin processes keep a visible interior.
+ */
+export function unionBody(D, c, fill, { sw = 2, glow = 0.26 } = {}) {
+  const e3 = sw * 1.05, e2 = sw * 0.4; // outer and inner edge of the membrane, measured out from the cores
+  const at = (k) => n(2 * (e2 + (e3 - e2) * k));
+  const j = 'stroke-linejoin="round"', dk = shade(c, -0.46);
+  return layer(D, `fill="none" stroke="${dk}" stroke-width="${n(2 * e3)}" ${j}`)
+    + layer(D, `fill="none" stroke="${shade(c, 0.5)}" stroke-width="${at(0.6)}" ${j} opacity="0.5"`)
+    + layer(D, `fill="none" stroke="${dk}" stroke-width="${at(0.4)}" ${j}`)
+    + layer(D, `fill="${fill}" stroke="${fill}" stroke-width="${n(2 * e2)}" ${j}`)
+    + layer(D, `fill="none" stroke="${shade(c, 0.62)}" stroke-width="${n(2 * e2)}" ${j} opacity="${glow}"`)
+    + layer(D, `fill="${fill}"`);
+}
+
 /** Bean / kidney-shaped nucleus outline. */
 export function bean(cx, cy, w, h, rot = 0) {
   const pts = [[-0.5, 0], [-0.4, -0.38], [0, -0.5], [0.4, -0.38], [0.5, 0], [0.38, 0.4], [0.16, 0.48], [0, 0.26], [-0.16, 0.48], [-0.38, 0.4]]
@@ -308,9 +332,10 @@ export function makeCell(c, u, o) {
   const ctx = { c, u, sh, col, nuc, keep, g };
   const run = (v) => (typeof v === 'function' ? v(ctx) : v || '');
   const clip = `${u}-bc`;
-  let s = defs(g, `<clipPath id="${clip}"><path d="${sh.d}"/></clipPath>`);
+  const B = shapeDef(u, 'bdy', sh.d);
+  let s = defs(g, B, `<clipPath id="${clip}">${layer(B, '')}</clipPath>`);
   s += run(o.under);
-  s += path(sh.d, g.url);
+  if (o.bodyFill !== false) s += path(B, g.url);
   let inner = '';
   if (o.texture !== 0) inner += speckle(sh.cx, sh.cy, sh.rx * 0.9, sh.ry * 0.9, o.texture ?? Math.round((sh.rx * sh.ry) / 40), 0.6, dark(col, 0.35), (o.seed || 1) + 11, 0.35);
   if (o.er && nuc[0]) inner += rer(nuc[0], o.er.color || col, o.er);
@@ -341,8 +366,8 @@ export function makeCell(c, u, o) {
     s += `<g fill="${gc}" stroke="${shade(gc, -0.38)}" stroke-width="${n((gr.r || 2) * 0.22)}">${body}</g><g fill="#fff" opacity="0.5">${hi}</g>`;
   }
   s += run(o.mid);
-  s += rim(u, 'br', sh.d, col, { op: o.rimOp ?? 0.28, from: o.rimFrom ?? 0.66, ...(o.membrane === false ? { glow: 0 } : {}) });
-  if (o.membrane !== false) s += membrane(sh.d, col, o.sw || 2.1);
+  if (o.rimOp !== 0) s += rim(u, 'br', B, col, { op: o.rimOp ?? 0.28, from: o.rimFrom ?? 0.66, ...(o.membrane === false ? { glow: 0 } : {}) });
+  if (o.membrane !== false) s += membrane(B, col, o.sw || 2.1);
   nuc.forEach((e, i) => {
     const ncol = e.color || c.secondary;
     if (e.kind === 'lobes') { s += lobedNucleus({ secondary: ncol }, `${u}-l${i}`, e.lobes, e.sw || 1.3); return; }
@@ -446,7 +471,17 @@ export function stellate(c, u, { cx = 50, cy = 50, rx = 16, ry = 15, arms = [], 
     list = gen(k);
   }
   const col = rest.color || c.primary;
-  list.push({ outlines: [shape.d], spines: [] });
-  const under = (ctx) => (typeof extraUnder === 'function' ? extraUnder(ctx, list) : extraUnder) + processes(list, armColor || col, { sw }) + (typeof armOver === 'function' ? armOver(ctx, list) : armOver);
-  return makeCell(c, u, { shape, grad: { lo: 0.04, hi: 0.45, r: 75 }, membrane: false, rimOp: 0.14, rimFrom: 0.72, mito: 1, ves: 1, ...rest, under, seed });
+  // the soma goes the same way round as the processes, so the union has no holes
+  list.push({ outlines: [area(shape.pts) < 0 ? smooth([...shape.pts].reverse(), shape.tension ?? 1) : shape.d], spines: [] });
+  const run = (v, ctx) => (typeof v === 'function' ? v(ctx, list) : v);
+  if (armColor) {
+    // processes in their own flat color under a normally shaded soma
+    const under = (ctx) => run(extraUnder, ctx) + processes(list, armColor, { sw }) + run(armOver, ctx);
+    return makeCell(c, u, { shape, grad: { lo: 0.04, hi: 0.45, r: 75 }, membrane: false, rimOp: 0.14, rimFrom: 0.72, mito: 1, ves: 1, ...rest, under, seed });
+  }
+  // soma and processes as one body: one membrane, one gradient, one edge shadow
+  const D = shapeDef(u, 'st', list.flatMap((b) => b.outlines).join(' '));
+  const under = (ctx) => defs(D) + run(extraUnder, ctx) + unionBody(D, col, ctx.g.url, { sw })
+    + rim(u, 'str', D, col, { op: 0.16, from: 0.4, glow: 0 }) + run(armOver, ctx);
+  return makeCell(c, u, { shape, grad: { lo: -0.1, hi: 0.36, r: 62, cx: 44, cy: 40 }, membrane: false, bodyFill: false, rimOp: 0, mito: 1, ves: 1, ...rest, under, seed });
 }

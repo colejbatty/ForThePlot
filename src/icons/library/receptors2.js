@@ -1,6 +1,6 @@
 // Channels and transporters, more receptors, antibody formats and signaling proteins.
 
-import { sphere, defs, path, circle, ellipse, rect, line, gloss, dark, light, shade, n, blob, ring, domain, helix, membraneStrip, linear, speckle } from './kit.js';
+import { sphere, defs, path, circle, ellipse, rect, line, gloss, dark, light, shade, n, blob, ring, domain, helix, membraneStrip, linear, speckle, globule } from './kit.js';
 import { igg, g, tm, stalked, ribbon, disulfide } from './molecules.js';
 
 const R3 = { primary: 'Main', secondary: 'Secondary', accent: 'Accent' };
@@ -18,7 +18,7 @@ const arrow = (x0, y0, x1, y1, col) => {
   return `<path d="M${n(x0)} ${n(y0)} L${n(x1)} ${n(y1)} M${n(x1 - Math.cos(a - 0.5) * h)} ${n(y1 - Math.sin(a - 0.5) * h)} L${n(x1)} ${n(y1)} L${n(x1 - Math.cos(a + 0.5) * h)} ${n(y1 - Math.sin(a + 0.5) * h)}" fill="none" stroke="${col}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>`;
 };
 /** A globular blob with a lit gradient. */
-const glob = (u, key, x, y, rx, ry, col, seed = 3, extra = '') => { const gr = sphere(u, key, col, { hi: 0.45 }); return defs(gr) + path(blob(x, y, rx, ry, { n: 9, wobble: 0.1, seed }), gr.url, dark(col, 0.42), 1.4, extra); };
+const glob = globule;
 /** Four-helix cytokine glyph. */
 const cytokine = (x, y, col, s = 1) => `<g transform="translate(${n(x)} ${n(y)}) scale(${s})">${helix(-9, -10, 5.6, 20, col, { sw: 0.8 })}${helix(-3, -12, 5.6, 22, shade(col, 0.12), { sw: 0.8 })}${helix(3, -10, 5.6, 20, col, { sw: 0.8 })}</g>`;
 /** Small virion with spikes. */

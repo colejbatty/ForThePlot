@@ -1,6 +1,6 @@
 // Blood, immune and stem cell types (additions to the original immune set).
 
-import { sphere, defs, path, circle, ellipse, gloss, dark, light, shade, n, rng, miniY, vesicle, smooth, blob, linear } from './kit.js';
+import { sphere, defs, path, circle, ellipse, gloss, dark, light, shade, n, rng, miniY, vesicle, smooth, blob, linear, shape, layer } from './kit.js';
 import { lymphocyte, rbcDisc } from './cells.js';
 import { cellCat, makeCell, round, star, outline, spindle, stellate, pack, knobs, arcBand, donut, lipid, rer, golgi, bean } from './cellkit.js';
 
@@ -181,11 +181,12 @@ export const bloodCells = [
     }, { w: 120, h: 60, size: 130, shape: 'rect' }),
 ];
 
-function ringNucleus(c, u, d) {
+function ringNucleus(c, u, path0) {
   const g = sphere(u, 'rn', c.secondary, { hi: 0.38, lo: -0.18 });
-  return defs(g, `<clipPath id="${u}-rnc"><path d="${d}"/></clipPath>`) + path(d, g.url)
+  const d = shape(u, 'rno', path0);
+  return defs(g, d, `<clipPath id="${u}-rnc">${layer(d, '')}</clipPath>`) + path(d, g.url)
     + `<g clip-path="url(#${u}-rnc)">${blobSpeck(c.secondary)}</g>`
-    + `<path d="${d}" fill="none" stroke="${dark(c.secondary, 0.42)}" stroke-width="1.5"/><path d="${d}" fill="none" stroke="${light(c.secondary, 0.35)}" stroke-width="0.45" opacity="0.55"/>`;
+    + layer(d, `fill="none" stroke="${dark(c.secondary, 0.42)}" stroke-width="1.5"`) + layer(d, `fill="none" stroke="${light(c.secondary, 0.35)}" stroke-width="0.45" opacity="0.55"`);
 }
 function blobSpeck(col) {
   const R = rng(5);

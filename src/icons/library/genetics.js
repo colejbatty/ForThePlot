@@ -1,6 +1,6 @@
 // Nucleic-acid structures and the machinery of gene expression and gene editing.
 
-import { sphere, defs, path, circle, ellipse, rect, line, gloss, dark, light, shade, n, rng, smooth, smoothOpen, blob, ring, domain, speckle } from './kit.js';
+import { sphere, defs, path, circle, ellipse, rect, line, gloss, dark, light, shade, n, rng, smooth, smoothOpen, blob, ring, domain, speckle, globule } from './kit.js';
 import { helix as dnaHelix, capsid, hexagon } from './bio.js';
 
 const R3 = { primary: 'Main', secondary: 'Secondary', accent: 'Accent' };
@@ -19,7 +19,7 @@ function ladder(x0, x1, y0, y1, c1, c2, { step = 6, seed = 1 } = {}) {
   return s + tube(`M${x0} ${y0} H${x1}`, c1) + tube(`M${x0} ${y1} H${x1}`, c2);
 }
 /** Globular protein with gradient. */
-const glob = (u, key, x, y, rx, ry, col, seed = 3) => { const g = sphere(u, key, col, { hi: 0.45 }); return defs(g) + path(blob(x, y, rx, ry, { n: 9, wobble: 0.1, seed }), g.url, dark(col, 0.42), 1.4); };
+const glob = globule;
 const lbl = (x, y, t, col, size = 6) => `<text x="${x}" y="${y}" font-size="${size}" font-family="Arial" font-weight="700" text-anchor="middle" fill="${col}">${t}</text>`;
 /** Small double helix segment placed and scaled. */
 const miniHelix = (c, x, y, w, h, turns = 1.4) => `<g transform="translate(${n(x)} ${n(y)}) scale(${n(w / 120)} ${n(h / 50)})">${dnaHelix(c, 120, 50, turns)}</g>`;
